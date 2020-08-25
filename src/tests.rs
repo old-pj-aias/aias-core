@@ -1,6 +1,7 @@
 use crate::crypto::TestCipherPubkey;
 use crate::signer;
 use crate::sender;
+use crate::verifyer;
 
 
 use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, BlindSignature, Subset, FBSSigner, CheckParameter };
@@ -36,6 +37,7 @@ fn generate_signer() -> FBSSigner<TestCipherPubkey> {
 fn test_init_and_destroy() {
     sender::new();
     signer::new();
+    verifyer::new_verifyer();
 
     let blinded_digest = sender::blind("aaa".to_string());
     signer::set_blinded_digest(blinded_digest.clone());
@@ -51,4 +53,5 @@ fn test_init_and_destroy() {
     
     sender::destroy();
     signer::destroy();
+    verifyer::destroy_verifyer();
 }
