@@ -150,6 +150,18 @@ pub extern fn generate_check_parameter_ios_free(s: *mut c_char) {
     free(s);
 }
 
+#[no_mangle]
+pub extern fn unblind_ios(to: *const c_char) -> *mut c_char{
+    let recipient = get_c_string(to);
+    let result = unblind(recipient);
+    CString::new(result).unwrap().into_raw()
+}
+
+#[no_mangle]
+pub extern fn unblind_ios_free(s: *mut c_char) {
+    free(s);
+}
+
 fn get_c_string(to: *const c_char) -> String{
     let c_str = unsafe { CStr::from_ptr(to) };
     match c_str.to_str() {
