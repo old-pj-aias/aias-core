@@ -50,7 +50,10 @@ fn test_init_and_destroy() {
 
     let blind_signature = signer::sign();
     let signature = sender::unblind(blind_signature);
-    
+
+    let result = verifyer::verify(signature, "aaa".to_string());
+    assert_eq!(result, true);
+
     sender::destroy();
     signer::destroy();
     verifyer::destroy_verifyer();

@@ -44,3 +44,19 @@ pub fn destroy_verifyer() {
         *odb = None;
     }); 
 }
+
+
+#[no_mangle]
+pub fn verify(signature: String, message: String) -> bool {
+    let mut is_vailed = false;
+    let signature: Signature = serde_json::from_str(&signature).expect("Parsing json error");
+
+    ODB.with(|odb_cell| { 
+        let mut odb = odb_cell.borrow_mut();
+        let verifyer = odb.as_mut().unwrap();
+       
+        is_vailed = verifyer.clone().verify(signature, message).unwrap();
+    });
+
+    is_vailed
+}
