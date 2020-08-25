@@ -103,7 +103,7 @@ pub extern fn new_ios(to: *const c_char){
 }
 
 #[no_mangle]
-pub extern fn blind_dig_ios(to: *const c_char) -> *mut c_char{
+pub extern fn blind_ios(to: *const c_char) -> *mut c_char{
     let recipient = utils::from_c_str(to);
     let result = blind(recipient.to_string());
     utils::to_c_str(result)

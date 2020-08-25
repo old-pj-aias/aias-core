@@ -16,7 +16,8 @@ thread_local!(static ODB: RefCell<Option<FBSVerifyer<TestCipherPubkey>>> = RefCe
 
 
 #[no_mangle]
-pub fn new_verifyer(signer_pubkey: String) {
+pub fn new_verifyer(signer_pubkey: *const c_char) {
+    let signer_pubkey = utils::from_c_str(signer_pubkey);
     let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
     let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
 
@@ -45,8 +46,12 @@ pub fn destroy_verifyer() {
 
 
 #[no_mangle]
-pub fn verify(signature: String, message: String) -> bool {
+pub fn verify(signature: *const c_char, message: *const c_char) -> bool {
     let mut is_vailed = false;
+
+    let message = utils::from_c_str(message);
+    
+    let signature = utils::from_c_str(signature);
     let signature: Signature = serde_json::from_str(&signature).expect("Parsing json error");
 
     ODB.with(|odb_cell| { 
