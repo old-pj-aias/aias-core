@@ -76,6 +76,20 @@ pub fn set_subset(subset: String) {
     });
 }
 
+pub fn generate_check_parameters() -> String {
+    let mut serialized = "".to_string();
+
+    ODB.with(|odb_cell| { 
+        let mut odb = odb_cell.borrow_mut();
+        let sender = odb.as_mut().unwrap();
+       
+        let check_parameters = sender.clone().generate_check_parameter().unwrap();
+        serialized = serde_json::to_string(&check_parameters).unwrap();
+    });
+
+    serialized
+}
+
 #[no_mangle]
 pub extern fn init_aias_ios(){
     new();
@@ -145,6 +159,8 @@ fn generate_signer() -> FBSSigner<TestCipherPubkey> {
     FBSSigner::new(parameters.clone(), signer_privkey)
 }
 
+
+
 #[test]
 fn test_init_and_destroy() {
     new();
@@ -153,7 +169,10 @@ fn test_init_and_destroy() {
 
     let subset = generate_signer().setup_subset();
     let serialized = serde_json::to_string(&subset).unwrap();
+    
     set_subset(serialized);
+    let result = generate_check_parameters();
+    println!("{}", result);
 
     destroy();
 }
