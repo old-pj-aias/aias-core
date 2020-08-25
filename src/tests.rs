@@ -45,6 +45,9 @@ fn test_init_and_destroy() {
     let blinded_digest: BlindedDigest = serde_json::from_str(&blinded_digest).expect("Parsing json error");
     signer.set_blinded_digest(blinded_digest);
 
+    let subset = server::setup_subset();
+    client::set_subset(subset);
+
     let subset = signer.setup_subset();
     let serialized = serde_json::to_string(&subset).unwrap();
     

@@ -55,3 +55,18 @@ pub fn set_blinded_digest(blinded_digest: String) {
     }); 
 }
 
+
+#[no_mangle]
+pub fn setup_subset() -> String {
+    let mut serialized = "".to_string();
+
+    ODB.with(|odb_cell| { 
+        let mut odb = odb_cell.borrow_mut();
+        let signer = odb.as_mut().unwrap();
+        let subset = signer.setup_subset();
+
+        serialized = serde_json::to_string(&subset).unwrap();
+    });
+
+    serialized
+}
