@@ -3,6 +3,8 @@ use crate::signer;
 use crate::sender;
 use crate::verifyer;
 
+use crate::utils;
+
 
 use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, BlindSignature, Subset, FBSSigner, CheckParameter };
 use std::cell::{RefCell, RefMut}; 
@@ -72,24 +74,29 @@ sLMc3RwqOeIibTsGJdqWTW6P8vLJxBduIT/90+XsS0gj+me80quAxQYRKmG6hE37
 O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 0sVQIY0n9eLL7sg5aCUpGKf4Qc88wF8OPYnBzjCeiJusjkGhQ5rqdQ==
 -----END RSA PRIVATE KEY-----"#.to_string();
+    
+    let pubkey = utils::to_c_str(pubkey);
+    let privkey = utils::to_c_str(privkey);
 
-    sender::new(pubkey.clone());
+    sender::new_ios(pubkey);
     signer::new(privkey, pubkey.clone());
     verifyer::new_verifyer(pubkey);
     
-    let blinded_digest = sender::blind("aaa".to_string());
-    signer::set_blinded_digest(blinded_digest.clone());
+    let message = utils::to_c_str("aaa".to_string());
+
+    let blinded_digest = sender::blind_ios(message);
+    signer::set_blinded_digest(blinded_digest);
 
     let subset = signer::setup_subset();
-    sender::set_subset(subset);
+    sender::set_subset_ios(subset);
 
-    let check_parameters = sender::generate_check_parameters();
-    signer::check(check_parameters.clone());
+    let check_parameters = sender::generate_check_parameter_ios();
+    signer::check(check_parameters);
 
     let blind_signature = signer::sign();
-    let signature = sender::unblind(blind_signature);
+    let signature = sender::unblind_ios(blind_signature);
 
-    let result = verifyer::verify(signature, "aaa".to_string());
+    let result = verifyer::verify(signature, message);
     assert_eq!(result, true);
 
     sender::destroy();

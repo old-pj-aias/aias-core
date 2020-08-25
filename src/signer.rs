@@ -15,10 +15,12 @@ use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, Public
 thread_local!(static ODB: RefCell<Option<FBSSigner<TestCipherPubkey>>> = RefCell::new(None)); 
 
 #[no_mangle]
-pub fn new(signer_privkey: String, signer_pubkey: String) {
+pub fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char) {
+    let signer_privkey = utils::from_c_str(signer_privkey);
     let signer_privkey = pem::parse(signer_privkey).expect("failed to parse pem");
     let signer_privkey = RSAPrivateKey::from_pkcs1(&signer_privkey.contents).expect("failed to parse pkcs8");
 
+    let signer_pubkey = utils::from_c_str(signer_pubkey);
     let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
     let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
 
@@ -46,7 +48,8 @@ pub fn destroy() {
 }
 
 #[no_mangle]
-pub fn set_blinded_digest(blinded_digest: String) {
+pub fn set_blinded_digest(blinded_digest: *const c_char) {
+    let blinded_digest = utils::from_c_str(blinded_digest);
     let blinded_digest: BlindedDigest = serde_json::from_str(&blinded_digest).expect("Parsing json error");
 
     ODB.with(|odb_cell| { 
@@ -58,7 +61,7 @@ pub fn set_blinded_digest(blinded_digest: String) {
 
 
 #[no_mangle]
-pub fn setup_subset() -> String {
+pub fn setup_subset() -> *mut c_char {
     let mut serialized = "".to_string();
 
     ODB.with(|odb_cell| { 
@@ -69,12 +72,13 @@ pub fn setup_subset() -> String {
         serialized = serde_json::to_string(&subset).unwrap();
     });
 
-    serialized
+    utils::to_c_str(serialized)
 }
 
 
 #[no_mangle]
-pub fn check(check_parameter: String) -> bool {
+pub fn check(check_parameter: *const c_char) -> bool {
+    let check_parameter = utils::from_c_str(check_parameter);
     let check_parameter: CheckParameter = serde_json::from_str(&check_parameter).expect("Parsing json error");
 
     let mut is_vailed = false;
@@ -90,7 +94,7 @@ pub fn check(check_parameter: String) -> bool {
 }
 
 #[no_mangle]
-pub fn sign() -> String {
+pub fn sign() -> *mut c_char {
     let mut serialized = "".to_string();
 
     ODB.with(|odb_cell| { 
@@ -100,5 +104,5 @@ pub fn sign() -> String {
         serialized = serde_json::to_string(&blind_signature).unwrap();
     });
 
-    serialized
+    utils::to_c_str(serialized)
 }

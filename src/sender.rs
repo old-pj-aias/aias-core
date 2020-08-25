@@ -97,33 +97,33 @@ pub fn unblind(blind_signature: String) -> String {
 
 #[no_mangle]
 pub extern fn new_ios(to: *const c_char){
-    let recipient = utils::get_c_string(to);
+    let recipient = utils::from_c_str(to);
 
     new(recipient);
 }
 
 #[no_mangle]
-pub extern fn blind_dig_ios(to: *const c_char) -> *mut c_char{
-    let recipient = utils::get_c_string(to);
+pub extern fn blind_ios(to: *const c_char) -> *mut c_char{
+    let recipient = utils::from_c_str(to);
     let result = blind(recipient.to_string());
-    CString::new(result).unwrap().into_raw()
+    utils::to_c_str(result)
 }
 
 #[no_mangle]
 pub extern fn set_subset_ios(to: *const c_char) {
-    let recipient = utils::get_c_string(to);
+    let recipient = utils::from_c_str(to);
     set_subset(recipient.to_string());
 }
 
 #[no_mangle]
 pub extern fn generate_check_parameter_ios() -> *mut c_char{
     let result = generate_check_parameters();
-    CString::new(result).unwrap().into_raw()
+    utils::to_c_str(result)
 }
 
 #[no_mangle]
 pub extern fn unblind_ios(to: *const c_char) -> *mut c_char{
-    let recipient = utils::get_c_string(to);
+    let recipient = utils::from_c_str(to);
     let result = unblind(recipient);
     CString::new(result).unwrap().into_raw()
 }
