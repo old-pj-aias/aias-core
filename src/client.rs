@@ -1,7 +1,7 @@
 use std::os::raw::{c_char};
 use std::ffi::{CString, CStr};
 
-use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, Subset, FBSSigner};
+use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, BlindSignature, Subset, FBSSigner, CheckParameter };
 use std::cell::{RefCell, RefMut}; 
 
 use rand::rngs::OsRng;
@@ -85,6 +85,22 @@ pub fn generate_check_parameters() -> String {
        
         let check_parameters = sender.clone().generate_check_parameter().unwrap();
         serialized = serde_json::to_string(&check_parameters).unwrap();
+    });
+
+    serialized
+}
+
+pub fn unblind(blind_signature: String) -> String {
+    let blind_signature: BlindSignature = serde_json::from_str(&blind_signature).expect("Parsing json error");
+
+    let mut serialized = "".to_string();
+
+    ODB.with(|odb_cell| { 
+        let mut odb = odb_cell.borrow_mut();
+        let sender = odb.as_mut().unwrap();
+       
+        let signature = sender.clone().unblind(blind_signature).unwrap();
+        serialized = serde_json::to_string(&signature).unwrap();
     });
 
     serialized
@@ -175,15 +191,25 @@ fn generate_signer() -> FBSSigner<TestCipherPubkey> {
 #[test]
 fn test_init_and_destroy() {
     new();
-    let result = blind("aaa".to_string());
-    println!("{}", result);
+    let mut signer = generate_signer();
+    
+    let blind_digest = blind("aaa".to_string());
+    let blind_digest: BlindedDigest = serde_json::from_str(&blind_digest).expect("Parsing json error");
+    signer.set_blinded_digest(blind_digest);
 
-    let subset = generate_signer().setup_subset();
+    let subset = signer.setup_subset();
     let serialized = serde_json::to_string(&subset).unwrap();
     
     set_subset(serialized);
-    let result = generate_check_parameters();
-    println!("{}", result);
+
+    let check_parameters = generate_check_parameters();
+    let check_parameters: CheckParameter = serde_json::from_str(&check_parameters).expect("Parsing json error");
+
+    signer.check(check_parameters);
+
+    let blind_signature = signer.sign().unwrap();
+    let blind_signature = serde_json::to_string(&blind_signature).unwrap();
+    let signature = unblind(blind_signature);
 
     destroy();
 }
