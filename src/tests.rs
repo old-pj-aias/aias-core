@@ -37,32 +37,18 @@ fn test_init_and_destroy() {
     client::new();
     server::new();
 
-    let mut signer = generate_signer();
-    
     let blinded_digest = client::blind("aaa".to_string());
     server::set_blinded_digest(blinded_digest.clone());
-
-    let blinded_digest: BlindedDigest = serde_json::from_str(&blinded_digest).expect("Parsing json error");
-    signer.set_blinded_digest(blinded_digest);
 
     let subset = server::setup_subset();
     client::set_subset(subset);
 
-    let subset = signer.setup_subset();
-    let serialized = serde_json::to_string(&subset).unwrap();
-    
-    client::set_subset(serialized);
-
     let check_parameters = client::generate_check_parameters();
     server::check(check_parameters.clone());
-    let check_parameters: CheckParameter = serde_json::from_str(&check_parameters).expect("Parsing json error");
 
-    signer.check(check_parameters);
-
-    let blind_signature = signer.sign().unwrap();
-    let blind_signature = serde_json::to_string(&blind_signature).unwrap();
+    let blind_signature = server::sign();
     let signature = client::unblind(blind_signature);
-
+    
     client::destroy();
     server::destroy();
 }

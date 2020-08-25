@@ -87,3 +87,18 @@ pub fn check(check_parameter: String) -> bool {
 
     is_vailed
 }
+
+#[no_mangle]
+pub fn sign() -> String {
+    let mut serialized = "".to_string();
+
+    ODB.with(|odb_cell| { 
+        let mut odb = odb_cell.borrow_mut();
+        let signer = odb.as_mut().unwrap();
+        let blind_signature = signer.sign().unwrap();
+        serialized = serde_json::to_string(&blind_signature).unwrap();
+
+    });
+
+    serialized
+}
