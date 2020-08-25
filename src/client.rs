@@ -21,8 +21,6 @@ impl EJPubKey for TestCipherPubkey {
     }
 }
 
-
-
 thread_local!(static ODB: RefCell<Option<FBSSender<TestCipherPubkey>>> = RefCell::new(None)); 
 
 pub fn new() {
@@ -90,37 +88,36 @@ pub extern fn init_aias_ios_free() {
 
 #[no_mangle]
 pub extern fn blind_dig_ios(to: *const c_char) -> *mut c_char{
-    let c_str = unsafe { CStr::from_ptr(to) };
-    let recipient = match c_str.to_str() {
-        Err(_) => "",
-        Ok(string) => string,
-    };
-
+    let recipient = get_c_string(to);
     let result = blind(recipient.to_string());
     CString::new(result).unwrap().into_raw()
 }
 
 #[no_mangle]
 pub extern fn blind_sig_ios_free(s: *mut c_char) {
-    unsafe {
-        if s.is_null() { return }
-        CString::from_raw(s)
-    };
+    free(s);
 }
 
 #[no_mangle]
 pub extern fn set_subset_ios(to: *const c_char) {
-    let c_str = unsafe { CStr::from_ptr(to) };
-    let recipient = match c_str.to_str() {
-        Err(_) => "",
-        Ok(string) => string,
-    };
-
+    let recipient = get_c_string(to);
     set_subset(recipient.to_string());
 }
 
 #[no_mangle]
 pub extern fn set_subset_ios_free(s: *mut c_char) {
+    free(s);
+}
+
+fn get_c_string(to: *const c_char) -> String{
+    let c_str = unsafe { CStr::from_ptr(to) };
+    match c_str.to_str() {
+        Err(_) => "".to_string(),
+        Ok(string) => string.to_string(),
+    }
+}
+
+fn free(s: *mut c_char) {
     unsafe {
         if s.is_null() { return }
         CString::from_raw(s)
