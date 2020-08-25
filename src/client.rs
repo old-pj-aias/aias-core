@@ -150,5 +150,10 @@ fn test_init_and_destroy() {
     new();
     let result = blind("aaa".to_string());
     println!("{}", result);
+
+    let subset = generate_signer().setup_subset();
+    let serialized = serde_json::to_string(&subset).unwrap();
+    set_subset(serialized);
+
     destroy();
 }
