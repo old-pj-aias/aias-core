@@ -67,6 +67,17 @@ pub fn blind(message: String) -> String {
     serialized
 }
 
+pub fn set_subset(subset: String) {
+    let subset: Subset = serde_json::from_str(&subset).expect("Parsing json error");
+
+    ODB.with(|odb_cell| { 
+        let mut odb = odb_cell.borrow_mut();
+        let sender = odb.as_mut().unwrap();
+        
+        sender.set_subset(subset);
+    });
+}
+
 #[no_mangle]
 pub extern fn init_aias_ios(){
     new();
