@@ -103,20 +103,10 @@ pub extern fn init_aias_ios(){
 }
 
 #[no_mangle]
-pub extern fn init_aias_ios_free() {
-    destroy();
-}
-
-#[no_mangle]
 pub extern fn blind_dig_ios(to: *const c_char) -> *mut c_char{
     let recipient = utils::get_c_string(to);
     let result = blind(recipient.to_string());
     CString::new(result).unwrap().into_raw()
-}
-
-#[no_mangle]
-pub extern fn blind_sig_ios_free(s: *mut c_char) {
-    utils::free(s);
 }
 
 #[no_mangle]
@@ -126,19 +116,9 @@ pub extern fn set_subset_ios(to: *const c_char) {
 }
 
 #[no_mangle]
-pub extern fn set_subset_ios_free(s: *mut c_char) {
-    utils::free(s);
-}
-
-#[no_mangle]
 pub extern fn generate_check_parameter_ios() -> *mut c_char{
     let result = generate_check_parameters();
     CString::new(result).unwrap().into_raw()
-}
-
-#[no_mangle]
-pub extern fn generate_check_parameter_ios_free(s: *mut c_char) {
-    utils::free(s);
 }
 
 #[no_mangle]
@@ -146,9 +126,4 @@ pub extern fn unblind_ios(to: *const c_char) -> *mut c_char{
     let recipient = utils::get_c_string(to);
     let result = unblind(recipient);
     CString::new(result).unwrap().into_raw()
-}
-
-#[no_mangle]
-pub extern fn unblind_ios_free(s: *mut c_char) {
-    utils::free(s);
 }
