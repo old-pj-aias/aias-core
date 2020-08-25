@@ -108,6 +108,25 @@ pub extern fn blind_sig_ios_free(s: *mut c_char) {
     };
 }
 
+#[no_mangle]
+pub extern fn set_subset_ios(to: *const c_char) {
+    let c_str = unsafe { CStr::from_ptr(to) };
+    let recipient = match c_str.to_str() {
+        Err(_) => "",
+        Ok(string) => string,
+    };
+
+    set_subset(recipient.to_string());
+}
+
+#[no_mangle]
+pub extern fn set_subset_ios_free(s: *mut c_char) {
+    unsafe {
+        if s.is_null() { return }
+        CString::from_raw(s)
+    };
+}
+
 #[test]
 fn test_init_and_destroy() {
     new();
