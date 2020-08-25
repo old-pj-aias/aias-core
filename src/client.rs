@@ -1,7 +1,7 @@
 use std::os::raw::{c_char};
 use std::ffi::{CString, CStr};
 
-use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest};
+use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, Subset};
 use std::cell::{RefCell, RefMut}; 
 
 use rand::rngs::OsRng;
@@ -57,15 +57,15 @@ pub fn blind(message: String) -> String {
     let mut serialized = "".to_string();
 
     ODB.with(|odb_cell| { 
-        let mut odb  = odb_cell.borrow_mut().as_mut().unwrap().clone();
-        let (digest, _ , _, _) = odb.blind(message).unwrap();
+        let mut odb = odb_cell.borrow_mut();
+        let sender = odb.as_mut().unwrap();
+        let (digest, _ , _, _) = sender.blind(message).unwrap();
 
         serialized = serde_json::to_string(&digest).unwrap();
     });
 
     serialized
 }
-
 
 #[no_mangle]
 pub extern fn init_aias_ios(){
