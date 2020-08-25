@@ -1,7 +1,7 @@
 use std::os::raw::{c_char};
 use std::ffi::{CString, CStr};
 
-use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, Subset};
+use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, Subset, FBSSigner};
 use std::cell::{RefCell, RefMut}; 
 
 use rand::rngs::OsRng;
@@ -122,6 +122,27 @@ fn free(s: *mut c_char) {
         if s.is_null() { return }
         CString::from_raw(s)
     };
+}
+
+fn generate_signer() -> FBSSigner<TestCipherPubkey> {
+    let n = BigUint::from(882323119 as u32);
+    let e = BigUint::from(7 as u32);
+    let d = BigUint::from(504150583 as u32);
+    let primes = [BigUint::from(27409 as u32), BigUint::from(32191 as u32)].to_vec();
+
+    let signer_pubkey = RSAPublicKey::new(n.clone(), e.clone()).unwrap();
+    let signer_privkey = RSAPrivateKey::from_components(n, e, d, primes);
+
+    let judge_pubkey = TestCipherPubkey {};
+
+    let parameters = FBSParameters {
+        signer_pubkey: signer_pubkey,
+        judge_pubkey: judge_pubkey,
+        k: 40,
+        id: 10
+    };
+    
+    FBSSigner::new(parameters.clone(), signer_privkey)
 }
 
 #[test]
