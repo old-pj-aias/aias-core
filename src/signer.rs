@@ -15,11 +15,12 @@ use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, Public
 thread_local!(static ODB: RefCell<Option<FBSSigner<TestCipherPubkey>>> = RefCell::new(None)); 
 
 #[no_mangle]
-pub fn new() {
-    let mut rng = OsRng;
-    let bits = 2048;
-    let signer_privkey = RSAPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
-    let signer_pubkey = RSAPublicKey::from(&signer_privkey);
+pub fn new(signer_privkey: String, signer_pubkey: String) {
+    let signer_privkey = pem::parse(signer_privkey).expect("failed to parse pem");
+    let signer_privkey = RSAPrivateKey::from_pkcs1(&signer_privkey.contents).expect("failed to parse pkcs8");
+
+    let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
+    let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
 
     let judge_pubkey = TestCipherPubkey {};
 
@@ -97,7 +98,6 @@ pub fn sign() -> String {
         let signer = odb.as_mut().unwrap();
         let blind_signature = signer.sign().unwrap();
         serialized = serde_json::to_string(&blind_signature).unwrap();
-
     });
 
     serialized
