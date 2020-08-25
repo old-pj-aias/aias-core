@@ -1,5 +1,6 @@
 use crate::crypto::TestCipherPubkey;
-use crate::client::*;
+use crate::client;
+use crate::server;
 
 
 use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, BlindSignature, Subset, FBSSigner, CheckParameter };
@@ -33,26 +34,29 @@ fn generate_signer() -> FBSSigner<TestCipherPubkey> {
 
 #[test]
 fn test_init_and_destroy() {
-    new();
+    client::new();
+    server::new();
+
     let mut signer = generate_signer();
     
-    let blind_digest = blind("aaa".to_string());
+    let blind_digest = client::blind("aaa".to_string());
     let blind_digest: BlindedDigest = serde_json::from_str(&blind_digest).expect("Parsing json error");
     signer.set_blinded_digest(blind_digest);
 
     let subset = signer.setup_subset();
     let serialized = serde_json::to_string(&subset).unwrap();
     
-    set_subset(serialized);
+    client::set_subset(serialized);
 
-    let check_parameters = generate_check_parameters();
+    let check_parameters = client::generate_check_parameters();
     let check_parameters: CheckParameter = serde_json::from_str(&check_parameters).expect("Parsing json error");
 
     signer.check(check_parameters);
 
     let blind_signature = signer.sign().unwrap();
     let blind_signature = serde_json::to_string(&blind_signature).unwrap();
-    let signature = unblind(blind_signature);
+    let signature = client::unblind(blind_signature);
 
-    destroy();
+    client::destroy();
+    server::destroy();
 }
