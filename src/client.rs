@@ -58,7 +58,7 @@ pub fn blind(message: String) -> String {
 
     ODB.with(|odb_cell| { 
         let mut odb  = odb_cell.borrow_mut().as_mut().unwrap().clone();
-        let (digest, _ , _, _) = odb.blind("".to_string()).unwrap();
+        let (digest, _ , _, _) = odb.blind(message).unwrap();
 
         serialized = serde_json::to_string(&digest).unwrap();
     });
@@ -77,9 +77,30 @@ pub extern fn init_aias_ios_free() {
     destroy();
 }
 
+#[no_mangle]
+pub extern fn blind_dig_ios(to: *const c_char) -> *mut c_char{
+    let c_str = unsafe { CStr::from_ptr(to) };
+    let recipient = match c_str.to_str() {
+        Err(_) => "",
+        Ok(string) => string,
+    };
+
+    let result = blind(recipient.to_string());
+    CString::new(result).unwrap().into_raw()
+}
+
+#[no_mangle]
+pub extern fn blind_sig_ios_free(s: *mut c_char) {
+    unsafe {
+        if s.is_null() { return }
+        CString::from_raw(s)
+    };
+}
+
 #[test]
 fn test_init_and_destroy() {
     new();
-    blind("aaa".to_string());
+    let result = blind("aaa".to_string());
+    println!("{}", result);
     destroy();
 }
