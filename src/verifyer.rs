@@ -16,11 +16,9 @@ thread_local!(static ODB: RefCell<Option<FBSVerifyer<TestCipherPubkey>>> = RefCe
 
 
 #[no_mangle]
-pub fn new_verifyer() {
-    let mut rng = OsRng;
-    let bits = 2048;
-    let signer_privkey = RSAPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
-    let signer_pubkey = RSAPublicKey::from(&signer_privkey);
+pub fn new_verifyer(signer_pubkey: String) {
+    let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
+    let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
 
     let judge_pubkey = TestCipherPubkey {};
 
