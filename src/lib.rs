@@ -1,5 +1,5 @@
 mod utils;
 mod crypto;
-mod client;
-mod server;
+mod sender;
+mod signer;
 mod tests;
