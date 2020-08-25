@@ -39,9 +39,11 @@ fn test_init_and_destroy() {
 
     let mut signer = generate_signer();
     
-    let blind_digest = client::blind("aaa".to_string());
-    let blind_digest: BlindedDigest = serde_json::from_str(&blind_digest).expect("Parsing json error");
-    signer.set_blinded_digest(blind_digest);
+    let blinded_digest = client::blind("aaa".to_string());
+    server::set_blinded_digest(blinded_digest.clone());
+
+    let blinded_digest: BlindedDigest = serde_json::from_str(&blinded_digest).expect("Parsing json error");
+    signer.set_blinded_digest(blinded_digest);
 
     let subset = signer.setup_subset();
     let serialized = serde_json::to_string(&subset).unwrap();

@@ -44,3 +44,14 @@ pub fn destroy() {
     }); 
 }
 
+#[no_mangle]
+pub fn set_blinded_digest(blinded_digest: String) {
+    let blinded_digest: BlindedDigest = serde_json::from_str(&blinded_digest).expect("Parsing json error");
+
+    ODB.with(|odb_cell| { 
+        let mut odb = odb_cell.borrow_mut();
+        let signer = odb.as_mut().unwrap();
+        signer.set_blinded_digest(blinded_digest);
+    }); 
+}
+
