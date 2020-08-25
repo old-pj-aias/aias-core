@@ -70,3 +70,20 @@ pub fn setup_subset() -> String {
 
     serialized
 }
+
+
+#[no_mangle]
+pub fn check(check_parameter: String) -> bool {
+    let check_parameter: CheckParameter = serde_json::from_str(&check_parameter).expect("Parsing json error");
+
+    let mut is_vailed = false;
+
+    ODB.with(|odb_cell| { 
+        let mut odb = odb_cell.borrow_mut();
+        let signer = odb.as_mut().unwrap();
+        is_vailed = signer.check(check_parameter).unwrap();
+
+    });
+
+    is_vailed
+}

@@ -54,6 +54,7 @@ fn test_init_and_destroy() {
     client::set_subset(serialized);
 
     let check_parameters = client::generate_check_parameters();
+    server::check(check_parameters.clone());
     let check_parameters: CheckParameter = serde_json::from_str(&check_parameters).expect("Parsing json error");
 
     signer.check(check_parameters);
