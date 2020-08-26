@@ -107,3 +107,8 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     signer::destroy();
     verifyer::destroy_verifyer();
 }
+
+#[test]
+fn encrypt_and_decrypt_with_threshold_crypto() {
+
+}
