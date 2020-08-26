@@ -1,4 +1,4 @@
-use crate::crypto::TestCipherPubkey;
+use crate::crypto::DistributedRSAPubKey;
 use crate::signer;
 use crate::sender;
 use crate::verifyer;
@@ -13,7 +13,7 @@ use rand::rngs::OsRng;
 use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
 
 
-fn generate_signer() -> FBSSigner<TestCipherPubkey> {
+fn generate_signer() -> FBSSigner<DistributedRSAPubKey> {
     let n = BigUint::from(882323119 as u32);
     let e = BigUint::from(7 as u32);
     let d = BigUint::from(504150583 as u32);
@@ -22,7 +22,7 @@ fn generate_signer() -> FBSSigner<TestCipherPubkey> {
     let signer_pubkey = RSAPublicKey::new(n.clone(), e.clone()).unwrap();
     let signer_privkey = RSAPrivateKey::from_components(n, e, d, primes);
 
-    let judge_pubkey = TestCipherPubkey {};
+    let judge_pubkey = DistributedRSAPubKey::new();
 
     let parameters = FBSParameters {
         signer_pubkey: signer_pubkey,

@@ -1,4 +1,4 @@
-use crate::crypto::TestCipherPubkey;
+use crate::crypto::DistributedRSAPubKey;
 use crate::utils;
 
 
@@ -11,21 +11,22 @@ use std::cell::{RefCell, RefMut};
 use rand::rngs::OsRng;
 use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
 
-thread_local!(static ODB: RefCell<Option<FBSVerifyer<TestCipherPubkey>>> = RefCell::new(None)); 
+thread_local!(static ODB: RefCell<Option<FBSVerifyer<DistributedRSAPubKey>>> = RefCell::new(None)); 
 
 
 
 #[no_mangle]
-pub fn new_verifyer(signer_pubkey: *const c_char) {
+pub fn new_verifyer(signer_pubkey: *const c_char, judge_pubkeys: *const c_char) {
     let signer_pubkey = utils::from_c_str(signer_pubkey);
     let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
     let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
 
-    let judge_pubkey = TestCipherPubkey {};
+    let judge_pubkeys_str = utils::from_c_str(judge_pubkeys);
+    let judge_pubkeys = DistributedRSAPubKey::from_json(judge_pubkeys_str);
 
     let parameters = FBSParameters {
         signer_pubkey: signer_pubkey,
-        judge_pubkey: judge_pubkey,
+        judge_pubkey: judge_pubkeys,
         k: 40,
         id: 10
     };

@@ -1,4 +1,4 @@
-use crate::crypto::TestCipherPubkey;
+use crate::crypto::DistributedRSAPubKey;
 use crate::utils;
 
 
@@ -12,17 +12,17 @@ use rand::rngs::OsRng;
 use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
 
 
-thread_local!(static ODB: RefCell<Option<FBSSender<TestCipherPubkey>>> = RefCell::new(None)); 
+thread_local!(static ODB: RefCell<Option<FBSSender<DistributedRSAPubKey>>> = RefCell::new(None)); 
 
-pub fn new(signer_pubkey: String) {
+pub fn new(signer_pubkey: String, judge_pubkeys: String) {
     let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
     let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
 
-    let judge_pubkey = TestCipherPubkey {};
+    let judge_pubkey = DistributedRSAPubKey::from_json(judge_pubkeys);
 
     let parameters = FBSParameters {
-        signer_pubkey: signer_pubkey,
-        judge_pubkey: judge_pubkey,
+        signer_pubkey,
+        judge_pubkey,
         k: 40,
         id: 10
     };
@@ -96,10 +96,11 @@ pub fn unblind(blind_signature: String) -> String {
 }
 
 #[no_mangle]
-pub extern fn new_ios(to: *const c_char){
-    let recipient = utils::from_c_str(to);
+pub extern fn new_ios(signer_pubkey: *const c_char, judge_pubkeys: *const c_char) {
+    let signer_pubkey = utils::from_c_str(signer_pubkey);
+    let judge_pubkeys = utils::from_c_str(judge_pubkeys);
 
-    new(recipient);
+    new(signer_pubkey, judge_pubkeys);
 }
 
 #[no_mangle]

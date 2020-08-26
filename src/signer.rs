@@ -1,4 +1,4 @@
-use crate::crypto::TestCipherPubkey;
+use crate::crypto::DistributedRSAPubKey;
 use crate::utils;
 
 use std::os::raw::c_char;
@@ -12,10 +12,10 @@ use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, Public
 
 
 
-thread_local!(static ODB: RefCell<Option<FBSSigner<TestCipherPubkey>>> = RefCell::new(None)); 
+thread_local!(static ODB: RefCell<Option<FBSSigner<DistributedRSAPubKey>>> = RefCell::new(None)); 
 
 #[no_mangle]
-pub fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char) {
+pub fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char, judge_pubkeys: *const c_char) {
     let signer_privkey = utils::from_c_str(signer_privkey);
     let signer_privkey = pem::parse(signer_privkey).expect("failed to parse pem");
     let signer_privkey = RSAPrivateKey::from_pkcs1(&signer_privkey.contents).expect("failed to parse pkcs8");
@@ -24,11 +24,12 @@ pub fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char) {
     let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
     let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
 
-    let judge_pubkey = TestCipherPubkey {};
+    let judge_pubkeys_str = utils::from_c_str(judge_pubkeys);
+    let judge_pubkeys = DistributedRSAPubKey::from_json(judge_pubkeys_str);
 
     let parameters = FBSParameters {
         signer_pubkey: signer_pubkey,
-        judge_pubkey: judge_pubkey,
+        judge_pubkey: judge_pubkeys,
         k: 40,
         id: 10
     };
