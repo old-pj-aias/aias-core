@@ -2,6 +2,7 @@ use crate::crypto::TestCipherPubkey;
 use crate::signer;
 use crate::sender;
 use crate::verifyer;
+use crate::crypto::ThresholdPubKey;
 
 use crate::utils;
 
@@ -78,8 +79,11 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let pubkey = utils::to_c_str(pubkey);
     let privkey = utils::to_c_str(privkey);
 
-    sender::new_ios(pubkey);
-    signer::new(privkey, pubkey.clone());
+    let judge_seckey_set = threshold_crypto::SecretKeySet::random(3, &mut OsRng);
+    let judge_pubkey = ThresholdPubKey::new(judge_seckey_set.public_keys());
+
+    sender::new_ios(pubkey, judge_pubkey.clone());
+    signer::new(privkey, pubkey.clone(), judge_pubkey);
     verifyer::new_verifyer(pubkey);
     
     let message = utils::to_c_str("aaa".to_string());

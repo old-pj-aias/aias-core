@@ -1,4 +1,4 @@
-use crate::crypto::TestCipherPubkey;
+use crate::crypto::ThresholdPubKey;
 use crate::utils;
 
 
@@ -8,17 +8,17 @@ use std::ffi::{CString, CStr};
 use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, BlindSignature, Subset, FBSSigner, CheckParameter };
 use std::cell::{RefCell, RefMut}; 
 
+use threshold_crypto::SecretKeySet;
+
 use rand::rngs::OsRng;
 use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
 
 
-thread_local!(static ODB: RefCell<Option<FBSSender<TestCipherPubkey>>> = RefCell::new(None)); 
+thread_local!(static ODB: RefCell<Option<FBSSender<ThresholdPubKey>>> = RefCell::new(None)); 
 
-pub fn new(signer_pubkey: String) {
+pub fn new(signer_pubkey: String, judge_pubkey: ThresholdPubKey) {
     let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
     let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
-
-    let judge_pubkey = TestCipherPubkey {};
 
     let parameters = FBSParameters {
         signer_pubkey: signer_pubkey,
@@ -96,10 +96,10 @@ pub fn unblind(blind_signature: String) -> String {
 }
 
 #[no_mangle]
-pub extern fn new_ios(to: *const c_char){
+pub extern fn new_ios(to: *const c_char, judge_pubkey: ThresholdPubKey) {
     let recipient = utils::from_c_str(to);
 
-    new(recipient);
+    new(recipient, judge_pubkey);
 }
 
 #[no_mangle]
