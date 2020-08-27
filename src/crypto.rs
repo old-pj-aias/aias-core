@@ -1,5 +1,5 @@
 use fair_blind_signature::EJPubKey;
-use rsa::{RSAPublicKey};
+use rsa::{RSAPublicKey, PublicKey};
 
 #[derive(Clone)]
 pub struct DistributedRSAPubKey {
@@ -41,7 +41,16 @@ impl DistributedRSAPubKey {
 
 impl EJPubKey for DistributedRSAPubKey {
     fn encrypt(&self, message: String) -> String {
-        message
+        let mut rng = rand::rngs::OsRng;
+
+        self.public_keys.iter().fold(message, |msg, pk| {
+            let padding = rsa::PaddingScheme::PKCS1v15Encrypt;
+            let cipher = pk
+                .encrypt(&mut rng, padding, msg.as_bytes())
+                .expect("failed to encrypt message");
+
+            String::from_utf8(cipher).unwrap()
+        })
     }
 
     fn dencrypt(&self, message: String) -> String {
