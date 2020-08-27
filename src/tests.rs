@@ -43,7 +43,7 @@ fn test_init_and_destroy() {
     let signer_pubkey = utils::to_c_str(signer_pubkey.to_string());
     let signer_privkey = utils::to_c_str(signer_privkey.to_string());
 
-    let judge_pubkeys: Vec<String> = (1..3)
+    let judge_pubkeys: Vec<String> = (1..=3)
         .map(|i| keys(i).0.to_string())
         .collect();
     let judge_pubkeys = json!(judge_pubkeys).to_string();
@@ -68,11 +68,64 @@ fn test_init_and_destroy() {
     let signature = sender::unblind_ios(blind_signature);
 
     let result = verifyer::verify(signature, message);
-    assert_eq!(result, true);
+    assert!(result);
 
     sender::destroy();
     signer::destroy();
     verifyer::destroy_verifyer();
+}
+
+#[test]
+fn destributed_rsa_pubkey_should_encrypt() {
+    use fair_blind_signature::EJPubKey;
+
+    let judges = 1..=3;
+    let plain = "hoge";
+
+    let judge_pubkeys: Vec<String> = judges
+        .map(|i| keys(i).0.to_string())
+        .collect();
+    let judge_pubkeys = json!(judge_pubkeys).to_string();
+    let distributed_keys = DistributedRSAPubKey::from_json(judge_pubkeys);
+
+    let mut judge_seckeys: Vec<RSAPrivateKey> = judges
+        .map(|i| {
+            let sk = keys(i).1;
+            let sk = pem::parse(sk).expect("failed to parse pem");
+            RSAPrivateKey::from_pkcs1(&sk.contents).expect("failed to parse pkcs8")
+        })
+        .collect();
+
+    /*
+    let (judge_pubkeys, judge_seckeys) = (1..=3)
+        .map(|i| {
+            let (pk, sk) = keys(i);
+            (pk.to_string(), sk.to_string())
+        })
+        .reduce((Vec::new(), Vec::new()) |(pks, sks), (pk, sk)| {
+            pks.push(pk);
+            sks.push(sk);
+            (pks, sks)
+        });
+
+    let judge_pubkeys = DistributedRSAPubKey::new(judge_pubkeys);
+    */
+
+    let cipher = distributed_keys.encrypt(plain.to_string());
+
+    judge_seckeys
+        .reverse();
+    let decrypted = judge_seckeys
+        .iter()
+        .fold(cipher.as_bytes(), |ct, sk| {
+            let padding = rsa::PaddingScheme::PKCS1v15Encrypt;
+            &sk.decrypt(padding, ct)
+                .expect("failed to decrypt cipher")
+        });
+        let decrypted = String::from_utf8_lossy(decrypted)
+            .to_string();
+    
+        assert_eq!(decrypted, plain);
 }
 
 fn keys(i: usize) -> (&'static str, &'static str) {
@@ -226,12 +279,24 @@ kP/yNGtYJ6xzSyoY8ugYX04g+8XZruOW+r+72AZsyDSE4GwmIWyN1dfpfRT0OKrO
 D1p7TEpGfOPlKMqL41ZLyMJCHiaf/V59QdMeKurEJtqtrO+eKZsqew==
 -----END RSA PRIVATE KEY-----"#;
 
+    // 128 bits
+    let pk5 = r#"-----BEGIN PUBLIC KEY-----
+MCwwDQYJKoZIhvcNAQEBBQADGwAwGAIRAKw35TrGu3NiwVxvl8H4QvECAwEAAQ==
+-----END PUBLIC KEY-----"#;
+    let sk5 = r#"-----BEGIN RSA PRIVATE KEY-----
+MGMCAQACEQCsN+U6xrtzYsFcb5fB+ELxAgMBAAECEHSIVgpRk2HdYv0v1c9meSkC
+CQDVA6ZVm3ZilwIJAM74uOR/RJ+3AgkAs/cea4sprMcCCQCwKub9nxJjOwIIcoMt
+JX7ER4Q=
+-----END RSA PRIVATE KEY-----"#;
+
+
     let mut v = Vec::new();
 
     v.push((pk1, sk1));
     v.push((pk2, sk2));
     v.push((pk3, sk3));
     v.push((pk4, sk4));
+    v.push((pk5, sk5));
 
     return v[i];
 }

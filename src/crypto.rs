@@ -49,7 +49,7 @@ impl EJPubKey for DistributedRSAPubKey {
                 .encrypt(&mut rng, padding, msg.as_bytes())
                 .expect("failed to encrypt message");
 
-            String::from_utf8(cipher).unwrap()
+            String::from_utf8_lossy(&cipher).to_string()
         })
     }
 
