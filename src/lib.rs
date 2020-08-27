@@ -28,9 +28,19 @@ pub extern "system" fn Java_com_aias_aias_Aias_blind(env: JNIEnv,
 
     let output = sender::blind(input);
 
-    let output = env.new_string(format!("Hello, {}!", output))
+    let output = env.new_string(output)
         .expect("Couldn't create java string!");
 
     output.into_inner()
+ }
+
+ #[no_mangle]
+pub extern "system" fn Java_com_aias_aias_Aias_setSubset(env: JNIEnv,
+                                             class: JClass,
+                                             input: JString) {
+    let input: String = 
+        env.get_string(input).expect("Couldn't get java string!").into();
+
+    sender::set_subset(input);
  }
 
