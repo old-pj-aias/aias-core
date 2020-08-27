@@ -1,9 +1,4 @@
-mod utils;
-mod crypto;
-mod sender;
-mod signer;
-mod verifyer;
-mod tests;
+use aias_core::sender;
 
 use jni::objects::{JClass, JString};
 use jni::JNIEnv;
@@ -66,4 +61,3 @@ pub extern "system" fn Java_com_aias_aias_Aias_unblind(env: JNIEnv,
 
     output.into_inner()
  }
-
