@@ -54,4 +54,16 @@ pub extern "system" fn Java_com_aias_aias_Aias_generateCheckParameter(env: JNIEn
     output.into_inner()
  }
 
+#[no_mangle]
+pub extern "system" fn Java_com_aias_aias_Aias_unblind(env: JNIEnv,
+                                             class: JClass,
+                                             input: JString) -> jstring {
+
+    let input = env.get_string(input).expect("Couldn't get java string!").into();
+
+    let output = sender::unblind(input);
+    let output = env.new_string(output).expect("Couldn't create java string!");
+
+    output.into_inner()
+ }
 
