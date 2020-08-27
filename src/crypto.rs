@@ -1,8 +1,5 @@
 use fair_blind_signature::EJPubKey;
 use rsa::{RSAPublicKey};
-use std::os::raw::c_char;
-
-use crate::utils;
 
 #[derive(Clone)]
 pub struct DistributedRSAPubKey {
@@ -20,14 +17,13 @@ impl DistributedRSAPubKey {
         use serde_json::Value;
 
         let pks = match serde_json::from_str(&json_str).unwrap() {
-            Value::Array(arr) => {
+            Value::Array(arr) =>
                 arr
-                    .iter()
+                    .into_iter()
                     .map(|v| {
                         if let Value::String(s) = v { s }
                         else { panic!("failed to parse json") }
-                    })
-            }, 
+                    }),
             _ => panic!("failed to get judge's public key")
         };
 

@@ -22,7 +22,7 @@ fn generate_signer() -> FBSSigner<DistributedRSAPubKey> {
     let signer_pubkey = RSAPublicKey::new(n.clone(), e.clone()).unwrap();
     let signer_privkey = RSAPrivateKey::from_components(n, e, d, primes);
 
-    let judge_pubkey = DistributedRSAPubKey::new();
+    let judge_pubkey = DistributedRSAPubKey::new(Vec::new());
 
     let parameters = FBSParameters {
         signer_pubkey: signer_pubkey,
