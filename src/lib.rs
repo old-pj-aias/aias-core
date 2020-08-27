@@ -44,3 +44,14 @@ pub extern "system" fn Java_com_aias_aias_Aias_setSubset(env: JNIEnv,
     sender::set_subset(input);
  }
 
+  #[no_mangle]
+pub extern "system" fn Java_com_aias_aias_Aias_generateCheckParameter(env: JNIEnv,
+                                             class: JClass) -> jstring {
+
+    let output = sender::generate_check_parameters();
+    let output = env.new_string(output).expect("Couldn't create java string!");
+
+    output.into_inner()
+ }
+
+
