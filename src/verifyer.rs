@@ -1,4 +1,4 @@
-use crate::crypto::DistributedRSAPubKey;
+use crate::crypto::MyRSAPubkey;
 use crate::utils;
 
 
@@ -11,7 +11,7 @@ use std::cell::{RefCell, RefMut};
 use rand::rngs::OsRng;
 use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
 
-thread_local!(static ODB: RefCell<Option<FBSVerifyer<DistributedRSAPubKey>>> = RefCell::new(None)); 
+thread_local!(static ODB: RefCell<Option<FBSVerifyer<MyRSAPubkey>>> = RefCell::new(None)); 
 
 
 
@@ -21,8 +21,15 @@ pub fn new_verifyer(signer_pubkey: *const c_char, judge_pubkeys: *const c_char) 
     let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
     let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
 
-    let judge_pubkeys_str = utils::from_c_str(judge_pubkeys);
-    let judge_pubkeys = DistributedRSAPubKey::from_json(judge_pubkeys_str);
+    let judge_pubkeys = utils::from_c_str(judge_pubkeys);
+    let judge_pubkeys = pem::parse(judge_pubkeys).expect("failed to parse pem");
+    let judge_pubkeys = RSAPublicKey::from_pkcs8(&judge_pubkeys.contents).expect("failed to parse pkcs8");
+
+    let judge_pubkeys = MyRSAPubkey{
+        public_key: judge_pubkeys
+    };
+    
+    // let judge_pubkeys = MyRSAPubkey::from_json(judge_pubkeys_str);
 
     let parameters = FBSParameters {
         signer_pubkey: signer_pubkey,
