@@ -1,4 +1,4 @@
-use crate::crypto::{DistributedRSAPubKey, MyRSAPubkey};
+use crate::crypto::{RSAPubKey};
 use crate::utils;
 
 
@@ -12,15 +12,15 @@ use rand::rngs::OsRng;
 use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
 
 
-thread_local!(static ODB: RefCell<Option<FBSSender<MyRSAPubkey>>> = RefCell::new(None)); 
+thread_local!(static ODB: RefCell<Option<FBSSender<RSAPubKey>>> = RefCell::new(None)); 
 
 pub fn new(signer_pubkey: String, judge_pubkeys: String) {
     let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
     let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
 
-    let judge_pubkeys = pem::parse(judge_pubkeys).expect("failed to parse pem");
-    let judge_pubkeys = RSAPublicKey::from_pkcs8(&judge_pubkeys.contents).expect("failed to parse pkcs8");
-    let judge_pubkey = MyRSAPubkey {public_key: judge_pubkeys};
+    let judge_pubkey = pem::parse(judge_pubkeys).expect("failed to parse pem");
+    let judge_pubkey = RSAPublicKey::from_pkcs8(&judge_pubkey.contents).expect("failed to parse pkcs8");
+    let judge_pubkey = RSAPubKey {public_key: judge_pubkey};
 
     let parameters = FBSParameters {
         signer_pubkey,

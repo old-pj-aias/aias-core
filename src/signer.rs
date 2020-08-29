@@ -1,4 +1,4 @@
-use crate::crypto::MyRSAPubkey;
+use crate::crypto::RSAPubKey;
 use crate::utils;
 
 use std::os::raw::c_char;
@@ -12,7 +12,7 @@ use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, Public
 
 
 
-thread_local!(static ODB: RefCell<Option<FBSSigner<MyRSAPubkey>>> = RefCell::new(None)); 
+thread_local!(static ODB: RefCell<Option<FBSSigner<RSAPubKey>>> = RefCell::new(None)); 
 
 #[no_mangle]
 pub fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char, judge_pubkeys: *const c_char) {
@@ -28,7 +28,7 @@ pub fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char, judge_pu
     let judge_pubkeys = pem::parse(judge_pubkeys).expect("failed to parse pem");
     let judge_pubkeys = RSAPublicKey::from_pkcs8(&judge_pubkeys.contents).expect("failed to parse pkcs8");
 
-    let judge_pubkeys = MyRSAPubkey{
+    let judge_pubkeys = RSAPubKey {
         public_key: judge_pubkeys
     };
 

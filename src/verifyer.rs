@@ -1,4 +1,4 @@
-use crate::crypto::MyRSAPubkey;
+use crate::crypto::RSAPubKey;
 use crate::utils;
 
 
@@ -11,7 +11,7 @@ use std::cell::{RefCell, RefMut};
 use rand::rngs::OsRng;
 use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
 
-thread_local!(static ODB: RefCell<Option<FBSVerifyer<MyRSAPubkey>>> = RefCell::new(None)); 
+thread_local!(static ODB: RefCell<Option<FBSVerifyer<RSAPubKey>>> = RefCell::new(None)); 
 
 
 
@@ -25,7 +25,7 @@ pub fn new_verifyer(signer_pubkey: *const c_char, judge_pubkeys: *const c_char) 
     let judge_pubkeys = pem::parse(judge_pubkeys).expect("failed to parse pem");
     let judge_pubkeys = RSAPublicKey::from_pkcs8(&judge_pubkeys.contents).expect("failed to parse pkcs8");
 
-    let judge_pubkeys = MyRSAPubkey{
+    let judge_pubkeys = RSAPubKey{
         public_key: judge_pubkeys
     };
     
