@@ -1,11 +1,13 @@
 use crate::crypto::RSAPubKey;
 
 
-use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, BlindSignature, Subset, FBSSigner, CheckParameter };
+use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, BlindSignature, Subset, FBSSigner, CheckParameter, EncryptedMessage, Unblinder };
 use std::cell::{RefCell, RefMut}; 
 
 use rand::rngs::OsRng;
 use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
+
+use serde::Deserialize;
 
 use crate::utils;
 
@@ -83,8 +85,34 @@ pub fn setup_subset() -> String {
 
 
 pub fn check(check_parameter: String) -> bool {
-    let check_parameter: CheckParameter = serde_json::from_str(&check_parameter).expect("Parsing json error");
+    #[derive(Deserialize)]
+    struct Parameters {
+        part_of_encrypted_message: EncryptedMessage,
+        part_of_unblinder: Unblinder_,
+        part_of_beta: Vec<u8>
+    }
+    #[derive(Deserialize)]
+    struct Unblinder_ {
+        r: Vec<Vec<u64>>
+    }
 
+    let p: Parameters = serde_json::from_str(&check_parameter).expect("Parsing json error");
+
+    let r: Vec<BigUint> = p.part_of_unblinder.r
+        .iter()
+        .map(|m| {
+            let x = utils::from_u64_vec_le(m);
+            BigUint::new(x)
+        })
+        .collect();
+    let part_of_unblinder = Unblinder { r };
+
+    let check_parameter = CheckParameter {
+        part_of_encrypted_message: p.part_of_encrypted_message,
+        part_of_unblinder: part_of_unblinder,
+        part_of_beta: p.part_of_beta
+    };
+     
     let mut is_vailed = false;
 
     ODB.with(|odb_cell| { 
