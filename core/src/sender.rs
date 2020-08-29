@@ -2,8 +2,7 @@ use crate::crypto::{RSAPubKey};
 use crate::utils;
 
 
-use std::os::raw::c_char;
-use std::ffi::{CString, CStr};
+
 
 use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, BlindSignature, Subset, FBSSigner, CheckParameter };
 use std::cell::{RefCell, RefMut}; 
@@ -97,37 +96,4 @@ pub fn unblind(blind_signature: String) -> String {
     serialized
 }
 
-#[no_mangle]
-pub extern fn new_ios(signer_pubkey: *const c_char, judge_pubkeys: *const c_char) {
-    let signer_pubkey = utils::from_c_str(signer_pubkey);
-    let judge_pubkeys = utils::from_c_str(judge_pubkeys);
-
-    new(signer_pubkey, judge_pubkeys);
-}
-
-#[no_mangle]
-pub extern fn blind_ios(to: *const c_char) -> *mut c_char{
-    let recipient = utils::from_c_str(to);
-    let result = blind(recipient.to_string());
-    utils::to_c_str(result)
-}
-
-#[no_mangle]
-pub extern fn set_subset_ios(to: *const c_char) {
-    let recipient = utils::from_c_str(to);
-    set_subset(recipient.to_string());
-}
-
-#[no_mangle]
-pub extern fn generate_check_parameter_ios() -> *mut c_char{
-    let result = generate_check_parameters();
-    utils::to_c_str(result)
-}
-
-#[no_mangle]
-pub extern fn unblind_ios(to: *const c_char) -> *mut c_char{
-    let recipient = utils::from_c_str(to);
-    let result = unblind(recipient);
-    CString::new(result).unwrap().into_raw()
-}
 
