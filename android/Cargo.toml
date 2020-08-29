@@ -1,0 +1,15 @@
+[package]
+name = "aias-core-android"
+version = "0.1.0"
+authors = ["akakou <akakou571@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+aias-core = { path = "../core" }
+jni = "0.14.0"
+
+[lib]
+crate-type = ["cdylib"]
+name = "aiascoreandroid"

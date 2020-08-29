@@ -15,7 +15,7 @@ use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, Public
 thread_local!(static ODB: RefCell<Option<FBSSigner<RSAPubKey>>> = RefCell::new(None)); 
 
 #[no_mangle]
-pub fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char, judge_pubkeys: *const c_char) {
+pub extern "C" fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char, judge_pubkey: *const c_char) {
     let signer_privkey = utils::from_c_str(signer_privkey);
     let signer_privkey = pem::parse(signer_privkey).expect("failed to parse pem");
     let signer_privkey = RSAPrivateKey::from_pkcs1(&signer_privkey.contents).expect("failed to parse pkcs8");
@@ -24,17 +24,17 @@ pub fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char, judge_pu
     let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
     let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
 
-    let judge_pubkeys = utils::from_c_str(judge_pubkeys);
-    let judge_pubkeys = pem::parse(judge_pubkeys).expect("failed to parse pem");
-    let judge_pubkeys = RSAPublicKey::from_pkcs8(&judge_pubkeys.contents).expect("failed to parse pkcs8");
+    let judge_pubkey = utils::from_c_str(judge_pubkey);
+    let judge_pubkey = pem::parse(judge_pubkey).expect("failed to parse pem");
+    let judge_pubkey = RSAPublicKey::from_pkcs8(&judge_pubkey.contents).expect("failed to parse pkcs8");
 
-    let judge_pubkeys = RSAPubKey {
-        public_key: judge_pubkeys
+    let judge_pubkey = RSAPubKey {
+        public_key: judge_pubkey
     };
 
     let parameters = FBSParameters {
         signer_pubkey: signer_pubkey,
-        judge_pubkey: judge_pubkeys,
+        judge_pubkey: judge_pubkey,
         k: 40,
         id: 10
     };
@@ -46,7 +46,7 @@ pub fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char, judge_pu
 }
 
 #[no_mangle]
-pub fn destroy() {
+pub extern "C" fn destroy() {
     ODB.with(|odb_cell| { 
         let mut odb = odb_cell.borrow_mut(); 
         *odb = None;
@@ -54,7 +54,7 @@ pub fn destroy() {
 }
 
 #[no_mangle]
-pub fn set_blinded_digest(blinded_digest: *const c_char) {
+pub extern "C" fn set_blinded_digest(blinded_digest: *const c_char) {
     let blinded_digest = utils::from_c_str(blinded_digest);
     let blinded_digest: BlindedDigest = serde_json::from_str(&blinded_digest).expect("Parsing json error");
 
@@ -67,7 +67,7 @@ pub fn set_blinded_digest(blinded_digest: *const c_char) {
 
 
 #[no_mangle]
-pub fn setup_subset() -> *mut c_char {
+pub extern "C" fn setup_subset() -> *mut c_char {
     let mut serialized = "".to_string();
 
     ODB.with(|odb_cell| { 
@@ -83,7 +83,7 @@ pub fn setup_subset() -> *mut c_char {
 
 
 #[no_mangle]
-pub fn check(check_parameter: *const c_char) -> bool {
+pub extern "C" fn check(check_parameter: *const c_char) -> bool {
     let check_parameter = utils::from_c_str(check_parameter);
     let check_parameter: CheckParameter = serde_json::from_str(&check_parameter).expect("Parsing json error");
 
@@ -100,7 +100,7 @@ pub fn check(check_parameter: *const c_char) -> bool {
 }
 
 #[no_mangle]
-pub fn sign() -> *mut c_char {
+pub extern "C" fn sign() -> *mut c_char {
     let mut serialized = "".to_string();
 
     ODB.with(|odb_cell| { 
