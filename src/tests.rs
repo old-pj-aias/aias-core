@@ -1,4 +1,4 @@
-use crate::crypto::DistributedRSAPubKey;
+use crate::crypto::{DistributedRSAPubKey, DistributedRSAPrivKey};
 use crate::signer;
 use crate::sender;
 use crate::verifyer;
@@ -33,7 +33,7 @@ fn generate_signer() -> FBSSigner<DistributedRSAPubKey> {
         id: 10
     };
     
-    FBSSigner::new(parameters.clone(), signer_privkey)
+    FBSSigner::new(parameters, signer_privkey)
 }
 
 
@@ -77,16 +77,20 @@ fn test_init_and_destroy() {
 
 #[test]
 fn destributed_rsa_pubkey_should_encrypt() {
-    use fair_blind_signature::EJPubKey;
+    use fair_blind_signature::{EJPubKey, EJPrivKey};
 
     let judges = 1..=3;
     let plain = "hoge";
 
     let judge_pubkeys: Vec<String> = judges
+        .clone()
         .map(|i| keys(i).0.to_string())
         .collect();
+    
     let judge_pubkeys = json!(judge_pubkeys).to_string();
-    let distributed_keys = DistributedRSAPubKey::from_json(judge_pubkeys);
+    let distributed_pubkeys = DistributedRSAPubKey::from_json(judge_pubkeys);
+
+    let cipher = distributed_pubkeys.encrypt(plain.to_string());
 
     let mut judge_seckeys: Vec<RSAPrivateKey> = judges
         .map(|i| {
@@ -96,36 +100,14 @@ fn destributed_rsa_pubkey_should_encrypt() {
         })
         .collect();
 
-    /*
-    let (judge_pubkeys, judge_seckeys) = (1..=3)
-        .map(|i| {
-            let (pk, sk) = keys(i);
-            (pk.to_string(), sk.to_string())
-        })
-        .reduce((Vec::new(), Vec::new()) |(pks, sks), (pk, sk)| {
-            pks.push(pk);
-            sks.push(sk);
-            (pks, sks)
-        });
-
-    let judge_pubkeys = DistributedRSAPubKey::new(judge_pubkeys);
-    */
-
-    let cipher = distributed_keys.encrypt(plain.to_string());
-
     judge_seckeys
         .reverse();
-    let decrypted = judge_seckeys
-        .iter()
-        .fold(cipher.as_bytes(), |ct, sk| {
-            let padding = rsa::PaddingScheme::PKCS1v15Encrypt;
-            &sk.decrypt(padding, ct)
-                .expect("failed to decrypt cipher")
-        });
-        let decrypted = String::from_utf8_lossy(decrypted)
-            .to_string();
-    
-        assert_eq!(decrypted, plain);
+
+    let distributed_prikeys = DistributedRSAPrivKey{ private_keys: judge_seckeys };
+    let decrypted = distributed_prikeys.decrypt(cipher)
+        .to_string();
+
+    assert_eq!(decrypted, plain);
 }
 
 fn keys(i: usize) -> (&'static str, &'static str) {

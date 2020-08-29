@@ -59,7 +59,7 @@ pub fn verify(signature: *const c_char, message: *const c_char) -> bool {
         let mut odb = odb_cell.borrow_mut();
         let verifyer = odb.as_mut().unwrap();
        
-        is_vailed = verifyer.clone().verify(signature, message).unwrap();
+        is_vailed = verifyer.verify(signature, message).unwrap();
     });
 
     is_vailed

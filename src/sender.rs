@@ -72,7 +72,7 @@ pub fn generate_check_parameters() -> String {
         let mut odb = odb_cell.borrow_mut();
         let sender = odb.as_mut().unwrap();
        
-        let check_parameters = sender.clone().generate_check_parameter().unwrap();
+        let check_parameters = sender.generate_check_parameter().unwrap();
         serialized = serde_json::to_string(&check_parameters).unwrap();
     });
 
@@ -88,7 +88,7 @@ pub fn unblind(blind_signature: String) -> String {
         let mut odb = odb_cell.borrow_mut();
         let sender = odb.as_mut().unwrap();
        
-        let signature = sender.clone().unblind(blind_signature).unwrap();
+        let signature = sender.unblind(blind_signature).unwrap();
         serialized = serde_json::to_string(&signature).unwrap();
     });
 
