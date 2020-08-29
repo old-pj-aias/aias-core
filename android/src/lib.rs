@@ -7,11 +7,14 @@ use jni::sys::jstring;
 #[no_mangle]
 pub extern "system" fn Java_com_aias_aias_Aias_new(env: JNIEnv,
                                              class: JClass,
-                                             input: JString) {
-    let input: String = 
-        env.get_string(input).expect("Couldn't get java string!").into();
+                                             input1: JString,
+                                             input2: JString) {
+    let input1: String = 
+        env.get_string(input1).expect("Couldn't get java string!").into();
+    let input2: String = 
+        env.get_string(input2).expect("Couldn't get java string!").into();
 
-    sender::new(input);
+    sender::new(input1, input2);
  }
 
 #[no_mangle]
