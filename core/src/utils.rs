@@ -21,3 +21,14 @@ pub fn free(s: *mut c_char) {
     };
 }
 
+pub fn from_u64_vec(src: String) -> Vec<u32> {
+    let v: Vec<u64> = serde_json::from_str(&src).expect("failed to parse u64");
+    v
+        .iter()
+        .map(|x| ((x | 0) as u32, (x >> 32) as u32))
+        .fold(Vec::new(), |res, (l, s)| {
+            res.push(l);
+            res.push(s);
+            res
+        })
+}
