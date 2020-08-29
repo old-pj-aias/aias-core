@@ -10,11 +10,18 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-fair-blind-signature = { git = "https://github.com/project-aias/fair-blind-signature", rev = "c63e07b" }
+fair-blind-signature = { git = "https://github.com/project-aias/fair-blind-signature", rev = "21ab91f" }
+distributed-rsa = { git = "https://github.com/project-aias/distributed-rsa" }
 rsa = "0.3.0"
 rand = "0.7.3"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 base64 = "0.12.3"
 pem = "0.8.1"
-jni = "0.14.0"
+num-traits = "0.2.12"
+num-bigint-dig = "0.3.0"
+rust-crypto = "0.2.36"
+aes = "0.5.0"
+block-modes = "0.6.1"
+sha2 = "0.9.1"
+hex-literal = "0.2.1"

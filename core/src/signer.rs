@@ -1,4 +1,4 @@
-use crate::crypto::TestCipherPubkey;
+use crate::crypto::RSAPubKey;
 use crate::utils;
 
 use std::os::raw::c_char;
@@ -12,10 +12,10 @@ use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, Public
 
 
 
-thread_local!(static ODB: RefCell<Option<FBSSigner<TestCipherPubkey>>> = RefCell::new(None)); 
+thread_local!(static ODB: RefCell<Option<FBSSigner<RSAPubKey>>> = RefCell::new(None)); 
 
 #[no_mangle]
-pub extern "C" fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char) {
+pub extern "C" fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char, judge_pubkey: *const c_char) {
     let signer_privkey = utils::from_c_str(signer_privkey);
     let signer_privkey = pem::parse(signer_privkey).expect("failed to parse pem");
     let signer_privkey = RSAPrivateKey::from_pkcs1(&signer_privkey.contents).expect("failed to parse pkcs8");
@@ -24,7 +24,13 @@ pub extern "C" fn new(signer_privkey: *const c_char, signer_pubkey: *const c_cha
     let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
     let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
 
-    let judge_pubkey = TestCipherPubkey {};
+    let judge_pubkey = utils::from_c_str(judge_pubkey);
+    let judge_pubkey = pem::parse(judge_pubkey).expect("failed to parse pem");
+    let judge_pubkey = RSAPublicKey::from_pkcs8(&judge_pubkey.contents).expect("failed to parse pkcs8");
+
+    let judge_pubkey = RSAPubKey {
+        public_key: judge_pubkey
+    };
 
     let parameters = FBSParameters {
         signer_pubkey: signer_pubkey,

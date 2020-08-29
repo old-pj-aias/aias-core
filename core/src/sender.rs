@@ -1,4 +1,4 @@
-use crate::crypto::TestCipherPubkey;
+use crate::crypto::{RSAPubKey};
 use crate::utils;
 
 
@@ -12,17 +12,19 @@ use rand::rngs::OsRng;
 use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
 
 
-thread_local!(static ODB: RefCell<Option<FBSSender<TestCipherPubkey>>> = RefCell::new(None)); 
+thread_local!(static ODB: RefCell<Option<FBSSender<RSAPubKey>>> = RefCell::new(None)); 
 
-pub fn new(signer_pubkey: String) {
+pub fn new(signer_pubkey: String, judge_pubkeys: String) {
     let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
     let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
 
-    let judge_pubkey = TestCipherPubkey {};
+    let judge_pubkey = pem::parse(judge_pubkeys).expect("failed to parse pem");
+    let judge_pubkey = RSAPublicKey::from_pkcs8(&judge_pubkey.contents).expect("failed to parse pkcs8");
+    let judge_pubkey = RSAPubKey {public_key: judge_pubkey};
 
     let parameters = FBSParameters {
-        signer_pubkey: signer_pubkey,
-        judge_pubkey: judge_pubkey,
+        signer_pubkey,
+        judge_pubkey,
         k: 40,
         id: 10
     };
@@ -72,7 +74,7 @@ pub fn generate_check_parameters() -> String {
         let mut odb = odb_cell.borrow_mut();
         let sender = odb.as_mut().unwrap();
        
-        let check_parameters = sender.clone().generate_check_parameter().unwrap();
+        let check_parameters = sender.generate_check_parameter().unwrap();
         serialized = serde_json::to_string(&check_parameters).unwrap();
     });
 
@@ -88,7 +90,7 @@ pub fn unblind(blind_signature: String) -> String {
         let mut odb = odb_cell.borrow_mut();
         let sender = odb.as_mut().unwrap();
        
-        let signature = sender.clone().unblind(blind_signature).unwrap();
+        let signature = sender.unblind(blind_signature).unwrap();
         serialized = serde_json::to_string(&signature).unwrap();
     });
 
@@ -96,10 +98,11 @@ pub fn unblind(blind_signature: String) -> String {
 }
 
 #[no_mangle]
-pub extern fn new_ios(to: *const c_char){
-    let recipient = utils::from_c_str(to);
+pub extern fn new_ios(signer_pubkey: *const c_char, judge_pubkeys: *const c_char) {
+    let signer_pubkey = utils::from_c_str(signer_pubkey);
+    let judge_pubkeys = utils::from_c_str(judge_pubkeys);
 
-    new(recipient);
+    new(signer_pubkey, judge_pubkeys);
 }
 
 #[no_mangle]
