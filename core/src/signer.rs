@@ -15,7 +15,7 @@ use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, Public
 thread_local!(static ODB: RefCell<Option<FBSSigner<TestCipherPubkey>>> = RefCell::new(None)); 
 
 #[no_mangle]
-pub fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char) {
+pub extern "C" fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char) {
     let signer_privkey = utils::from_c_str(signer_privkey);
     let signer_privkey = pem::parse(signer_privkey).expect("failed to parse pem");
     let signer_privkey = RSAPrivateKey::from_pkcs1(&signer_privkey.contents).expect("failed to parse pkcs8");
@@ -40,7 +40,7 @@ pub fn new(signer_privkey: *const c_char, signer_pubkey: *const c_char) {
 }
 
 #[no_mangle]
-pub fn destroy() {
+pub extern "C" fn destroy() {
     ODB.with(|odb_cell| { 
         let mut odb = odb_cell.borrow_mut(); 
         *odb = None;
@@ -48,7 +48,7 @@ pub fn destroy() {
 }
 
 #[no_mangle]
-pub fn set_blinded_digest(blinded_digest: *const c_char) {
+pub extern "C" fn set_blinded_digest(blinded_digest: *const c_char) {
     let blinded_digest = utils::from_c_str(blinded_digest);
     let blinded_digest: BlindedDigest = serde_json::from_str(&blinded_digest).expect("Parsing json error");
 
@@ -61,7 +61,7 @@ pub fn set_blinded_digest(blinded_digest: *const c_char) {
 
 
 #[no_mangle]
-pub fn setup_subset() -> *mut c_char {
+pub extern "C" fn setup_subset() -> *mut c_char {
     let mut serialized = "".to_string();
 
     ODB.with(|odb_cell| { 
@@ -77,7 +77,7 @@ pub fn setup_subset() -> *mut c_char {
 
 
 #[no_mangle]
-pub fn check(check_parameter: *const c_char) -> bool {
+pub extern "C" fn check(check_parameter: *const c_char) -> bool {
     let check_parameter = utils::from_c_str(check_parameter);
     let check_parameter: CheckParameter = serde_json::from_str(&check_parameter).expect("Parsing json error");
 
@@ -94,7 +94,7 @@ pub fn check(check_parameter: *const c_char) -> bool {
 }
 
 #[no_mangle]
-pub fn sign() -> *mut c_char {
+pub extern "C" fn sign() -> *mut c_char {
     let mut serialized = "".to_string();
 
     ODB.with(|odb_cell| { 
