@@ -7,6 +7,8 @@ use std::cell::{RefCell, RefMut};
 use rand::rngs::OsRng;
 use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
 
+use crate::utils;
+
 
 thread_local!(static ODB: RefCell<Option<FBSSigner<RSAPubKey>>> = RefCell::new(None)); 
 
@@ -45,7 +47,17 @@ pub fn destroy() {
 }
 
 pub fn set_blinded_digest(blinded_digest: String) {
-    let blinded_digest: BlindedDigest = serde_json::from_str(&blinded_digest).expect("Parsing json error");
+    let u64_vec_vec = serde_json::from_str(&blinded_digest);
+
+    let blinded_digest: Vec<BigUint> = u64_vec_vec
+        .iter()
+        .map(|m| {
+            let x = utils::from_u64_vec_le(m);
+            BigUint::new(x)
+        })
+        .collect();
+     
+    let blinded_digest = BlindedDigest { m: blinded_digest };
 
     ODB.with(|odb_cell| { 
         let mut odb = odb_cell.borrow_mut();
