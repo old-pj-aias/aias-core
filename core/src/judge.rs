@@ -6,7 +6,7 @@ use serde_json;
 use rsa::{RSAPrivateKey, RSAPublicKey};
 use std::cell::RefCell; 
 use rand::rngs::OsRng;
-
+use fair_blind_signature::EJPrivKey;
 
 thread_local!(static ODB: RefCell<Option<Judge<DistributedRSAPrivKey>>> = RefCell::new(None)); 
 
@@ -24,4 +24,11 @@ pub fn divide_keys(prevkey: String, pubkey: String) -> DistributedRSAPrivKey {
     let privkey = DistributedRSAPrivKey::new(&privkey, &pubkey);
 
     return privkey;
+}
+
+pub fn open(signature: String, judge_privkey: DistributedRSAPrivKey) -> Vec<String> {
+    let signature : Signature = serde_json::from_str(&signature).unwrap();
+
+    let judge = Judge::new(judge_privkey);
+    judge.open(signature.encrypted_id)
 }

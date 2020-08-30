@@ -47,7 +47,6 @@ fn generate_signer() -> FBSSigner<RSAPubKey> {
 
 #[test]
 fn test_init_and_destroy() {
-
     let (signer_pubkey, signer_privkey) = keys(0);
     let (judge_pubkey, judge_privkey) = keys(1);
 
@@ -75,12 +74,18 @@ fn test_init_and_destroy() {
     let blind_signature = signer::sign();
     let signature = sender::unblind(blind_signature);
 
-    let result = verifyer::verify(signature, message);
+    let result = verifyer::verify(signature.clone(), message);
     assert!(result);
 
     sender::destroy();
     signer::destroy();
     verifyer::destroy_verifyer();
+
+    let result = judge::open(signature, judge_privkey);
+
+    assert_eq!(result[0].as_bytes()[0], "1".as_bytes()[0]);
+    assert_eq!(result[0].as_bytes()[1], "0".as_bytes()[0]);
+
 }
 
 
