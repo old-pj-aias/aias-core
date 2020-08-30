@@ -22,7 +22,7 @@ pub struct Signer {
 impl Signer {
     pub fn new(signer_privkey: String, signer_pubkey: String, judge_pubkey: String) -> Self {
         let signer_privkey = pem::parse(signer_privkey).expect("failed to parse pem");
-        let signer_privkey = RSAPrivateKey::from_pkcs1(&signer_privkey.contents).expect("failed to parse pkcs8");
+        let signer_privkey = RSAPrivateKey::from_pkcs8(&signer_privkey.contents).expect("failed to parse pkcs8");
 
         let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
         let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
