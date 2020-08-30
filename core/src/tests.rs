@@ -27,8 +27,6 @@ fn generate_signer() -> FBSSigner<RSAPubKey> {
     let signer_privkey = RSAPrivateKey::from_components(n.clone(), e.clone(), d.clone(), primes.clone());
 
     let judge_pubkey = RSAPublicKey::new(n.clone(), e.clone()).unwrap();
-    // let judge_privkey = RSAPrivateKey::from_components(n, e, d, primes);
-
 
     let judge_pubkey = RSAPubKey {
         public_key: judge_pubkey
@@ -60,7 +58,6 @@ fn test_init_and_destroy() {
 
     sender::new(signer_pubkey.clone(), judge_pubkey.clone());
     signer::new(signer_privkey, signer_pubkey.clone(), judge_pubkey.clone());
-    verifyer::new_verifyer(signer_pubkey, judge_pubkey);
 
     let blinded_digest = sender::blind(message.clone());
     signer::set_blinded_digest(blinded_digest);
@@ -74,18 +71,16 @@ fn test_init_and_destroy() {
     let blind_signature = signer::sign();
     let signature = sender::unblind(blind_signature);
 
-    let result = verifyer::verify(signature.clone(), message);
+    let result = verifyer::verify(signature.clone(), message, signer_pubkey, judge_pubkey);
     assert!(result);
 
     sender::destroy();
     signer::destroy();
-    verifyer::destroy_verifyer();
 
     let result = judge::open(signature, judge_privkey);
 
     assert_eq!(result[0].as_bytes()[0], "1".as_bytes()[0]);
     assert_eq!(result[0].as_bytes()[1], "0".as_bytes()[0]);
-
 }
 
 

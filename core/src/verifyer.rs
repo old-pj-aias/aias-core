@@ -11,12 +11,12 @@ use std::cell::{RefCell, RefMut};
 use rand::rngs::OsRng;
 use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
 
-thread_local!(static ODB: RefCell<Option<FBSVerifyer<RSAPubKey>>> = RefCell::new(None)); 
 
+pub fn verify(signature: String, message: String, signer_pubkey: String, judge_pubkeys: String) -> bool {
+    let mut is_vailed = false;
 
+    let signature: Signature = serde_json::from_str(&signature).expect("Parsing json error");
 
-#[no_mangle]
-pub fn new_verifyer(signer_pubkey: String, judge_pubkeys: String) {
     let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
     let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
 
@@ -27,42 +27,13 @@ pub fn new_verifyer(signer_pubkey: String, judge_pubkeys: String) {
         public_key: judge_pubkeys
     };
     
-    // let judge_pubkeys = MyRSAPubkey::from_json(judge_pubkeys_str);
-
     let parameters = FBSParameters {
         signer_pubkey: signer_pubkey,
         judge_pubkey: judge_pubkeys,
         k: 40,
         id: 10
     };
-
-    ODB.with(|odb_cell| { 
-        let mut odb = odb_cell.borrow_mut();
-        *odb = Some(FBSVerifyer::new(parameters));
-    });
-}
-
-#[no_mangle]
-pub fn destroy_verifyer() {
-    ODB.with(|odb_cell| { 
-        let mut odb = odb_cell.borrow_mut(); 
-        *odb = None;
-    }); 
-}
-
-
-#[no_mangle]
-pub fn verify(signature: String, message: String) -> bool {
-    let mut is_vailed = false;
-
-    let signature: Signature = serde_json::from_str(&signature).expect("Parsing json error");
-
-    ODB.with(|odb_cell| { 
-        let mut odb = odb_cell.borrow_mut();
-        let verifyer = odb.as_mut().unwrap();
-       
-        is_vailed = verifyer.verify(signature, message);
-    });
-
-    is_vailed
+    
+    let verifyer = FBSVerifyer::new(parameters);
+    verifyer.verify(signature, message)
 }

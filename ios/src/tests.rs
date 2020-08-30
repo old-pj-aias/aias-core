@@ -54,7 +54,6 @@ fn test_init_and_destroy() {
     let judge_pubkey = judge_pubkey.to_string();
 
     signer::new(signer_privkey.clone(), signer_pubkey.clone(), judge_pubkey.clone());
-    verifyer::new_verifyer(signer_pubkey.clone(), judge_pubkey.clone());
 
     let signer_pubkey = utils::to_c_str(signer_pubkey.to_string());
     let signer_privkey = utils::to_c_str(signer_privkey.to_string());
@@ -85,13 +84,15 @@ fn test_init_and_destroy() {
 
     let signature = utils::from_c_str(signature);
     let message = utils::from_c_str(message);
-    let result = verifyer::verify(signature, message);
+    
+    let signer_pubkey = utils::from_c_str(signer_pubkey);
+    let judge_pubkey = utils::from_c_str(judge_pubkey);
+    let result = verifyer::verify(signature, message, signer_pubkey, judge_pubkey.clone());
 
     assert!(result);
 
     destroy_ios();
     signer::destroy();
-    verifyer::destroy_verifyer();
 }
 
 
