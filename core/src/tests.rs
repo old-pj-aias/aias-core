@@ -1,4 +1,5 @@
 use crate::crypto::{RSAPubKey, DistributedRSAPrivKey};
+use crate::judge;
 use crate::signer;
 use crate::sender;
 use crate::verifyer;
@@ -46,15 +47,15 @@ fn generate_signer() -> FBSSigner<RSAPubKey> {
 
 #[test]
 fn test_init_and_destroy() {
-    let signer = generate_signer();
+
     let (signer_pubkey, signer_privkey) = keys(0);
     let (judge_pubkey, judge_privkey) = keys(1);
 
+    let judge_pubkey = judge_pubkey.to_string();
+    let judge_privkey = judge::divide_keys(judge_privkey.to_string(), judge_pubkey.clone());
+
     let signer_pubkey = signer_pubkey.to_string();
     let signer_privkey = signer_privkey.to_string();
-
-    let judge_pubkey = judge_pubkey.to_string();
-    let judge_privkey = judge_privkey.to_string();
 
     let message = "hoge".to_string();
 
