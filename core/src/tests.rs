@@ -1,6 +1,6 @@
 use crate::crypto::{RSAPubKey, DistributedRSAPrivKey};
 use crate::judge;
-use crate::signer;
+use crate::signer::{Signer};
 use crate::sender;
 use crate::verifyer;
 
@@ -43,7 +43,6 @@ fn generate_signer() -> FBSSigner<RSAPubKey> {
 }
 
 
-/*
 #[test]
 fn test_init_and_destroy() {
     let (signer_pubkey, signer_privkey) = keys(0);
@@ -58,32 +57,30 @@ fn test_init_and_destroy() {
     let message = "hoge".to_string();
 
     sender::new(signer_pubkey.clone(), judge_pubkey.clone());
-    signer::new(signer_privkey, signer_pubkey.clone(), judge_pubkey.clone());
+    let mut signer = Signer::new(signer_privkey, signer_pubkey.clone(), judge_pubkey.clone());
 
     let blinded_digest = sender::blind(message.clone());
-    signer::set_blinded_digest(blinded_digest);
+    signer.set_blinded_digest(blinded_digest);
 
-    let subset = signer::setup_subset();
+    let subset = signer.setup_subset();
     sender::set_subset(subset);
 
     let check_parameters = sender::generate_check_parameters();
-    signer::check(check_parameters);
+    signer.check(check_parameters);
 
-    let blind_signature = signer::sign();
+    let blind_signature = signer.sign();
     let signature = sender::unblind(blind_signature);
 
     let result = verifyer::verify(signature.clone(), message, signer_pubkey, judge_pubkey);
     assert!(result);
 
     sender::destroy();
-    signer::destroy();
 
     let result = judge::open(signature, judge_privkey);
 
     assert_eq!(result[0].as_bytes()[0], "1".as_bytes()[0]);
     assert_eq!(result[0].as_bytes()[1], "0".as_bytes()[0]);
 }
-*/
 
 
 fn keys(i: usize) -> (&'static str, &'static str) {

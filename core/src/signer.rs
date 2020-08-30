@@ -46,20 +46,12 @@ impl Signer {
         }
     }
 
-    pub fn set_blinded_digest(&mut self, blinded_digest: String) {
-        let u64_vec_vec = serde_json::from_str(&blinded_digest);
+    pub fn set_blinded_digest(&mut self, blinded_digest: String) -> serde_json::Result<()> {
+        let data: BlindedDigest = serde_json::from_str(&blinded_digest)?;
 
-        let blinded_digest: Vec<BigUint> = u64_vec_vec
-            .iter()
-            .map(|m| {
-                let x = utils::from_u64_vec_le(m);
-                BigUint::new(x)
-            })
-            .collect();
-        
-        let blinded_digest = BlindedDigest { m: blinded_digest };
+        self.signer.set_blinded_digest(data);
 
-        self.signer.set_blinded_digest(blinded_digest);
+        Ok(())
     }
 
 
@@ -103,7 +95,7 @@ impl Signer {
             part_of_beta: p.part_of_beta
         };
         
-        self.signer.check(check_parameter).unwrap_or(false)
+        self.signer.check(check_parameter)
     }
 
     pub fn sign(&self) -> String {
