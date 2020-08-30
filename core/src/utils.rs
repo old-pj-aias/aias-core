@@ -21,3 +21,13 @@ pub fn free(s: *mut c_char) {
     };
 }
 
+pub fn from_u64_vec_le(src: &Vec<u64>) -> Vec<u32> {
+    src
+        .iter()
+        .map(|x| ((x | 0) as u32, (x >> 32) as u32))
+        .fold(Vec::new(), |mut res, (l, s)| {
+            res.push(l);
+            res.push(s);
+            res
+        })
+}

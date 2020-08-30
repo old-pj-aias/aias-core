@@ -43,6 +43,7 @@ fn generate_signer() -> FBSSigner<RSAPubKey> {
 }
 
 
+/*
 #[test]
 fn test_init_and_destroy() {
     let (signer_pubkey, signer_privkey) = keys(0);
@@ -82,6 +83,7 @@ fn test_init_and_destroy() {
     assert_eq!(result[0].as_bytes()[0], "1".as_bytes()[0]);
     assert_eq!(result[0].as_bytes()[1], "0".as_bytes()[0]);
 }
+*/
 
 
 fn keys(i: usize) -> (&'static str, &'static str) {
