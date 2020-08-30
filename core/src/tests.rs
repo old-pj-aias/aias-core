@@ -50,36 +50,32 @@ fn test_init_and_destroy() {
     let (signer_pubkey, signer_privkey) = keys(0);
     let (judge_pubkey, judge_privkey) = keys(1);
 
-    let signer_pubkey = utils::to_c_str(signer_pubkey.to_string());
-    let signer_privkey = utils::to_c_str(signer_privkey.to_string());
-    let judge_pubkey = utils::to_c_str(judge_pubkey.to_string());
+    let signer_pubkey = signer_pubkey.to_string();
+    let signer_privkey = signer_privkey.to_string();
 
-    // let judge_pubkeys: Vec<String> = (1..=3)
-    //     .map(|i| keys(i).0.to_string())
-    //     .collect();
-    // let judge_pubkeys = json!(judge_pubkeys).to_string();
-    // let judge_pubkeys = utils::to_c_str(keys(1));
+    let judge_pubkey = judge_pubkey.to_string();
+    let judge_privkey = judge_privkey.to_string();
 
-    sender::new_ios(signer_pubkey, judge_pubkey);
-    signer::new(signer_privkey, signer_pubkey.clone(), judge_pubkey);
+    let message = "hoge".to_string();
+
+    sender::new(signer_pubkey.clone(), judge_pubkey.clone());
+    signer::new(signer_privkey, signer_pubkey.clone(), judge_pubkey.clone());
     verifyer::new_verifyer(signer_pubkey, judge_pubkey);
-    
-    let message = utils::to_c_str("aaa".to_string());
 
-    let blinded_digest = sender::blind_ios(message);
+    let blinded_digest = sender::blind(message.clone());
     signer::set_blinded_digest(blinded_digest);
 
     let subset = signer::setup_subset();
-    sender::set_subset_ios(subset);
+    sender::set_subset(subset);
 
-    let check_parameters = sender::generate_check_parameter_ios();
+    let check_parameters = sender::generate_check_parameters();
     signer::check(check_parameters);
 
     let blind_signature = signer::sign();
-    let signature = sender::unblind_ios(blind_signature);
+    let signature = sender::unblind(blind_signature);
 
     let result = verifyer::verify(signature, message);
-    // assert!(result);
+    assert!(result);
 
     sender::destroy();
     signer::destroy();
