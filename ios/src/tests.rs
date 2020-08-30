@@ -1,11 +1,10 @@
-use crate::crypto::{RSAPubKey, DistributedRSAPrivKey};
-use crate::judge;
-use crate::signer;
-use crate::sender;
-use crate::verifyer;
+use super::{new_ios, blind_ios, set_subset_ios, generate_check_parameter_ios, unblind_ios, destroy_ios};
 
-use crate::utils;
-use crate::crypto;
+use aias_core::signer;
+use aias_core::verifyer;
+
+use aias_core::utils;
+use aias_core::crypto::{RSAPubKey};
 
 use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, BlindSignature, Subset, FBSSigner, CheckParameter };
 use std::cell::{RefCell, RefMut}; 
@@ -43,47 +42,58 @@ fn generate_signer() -> FBSSigner<RSAPubKey> {
 }
 
 
-/*
 #[test]
 fn test_init_and_destroy() {
+    let signer = generate_signer();
     let (signer_pubkey, signer_privkey) = keys(0);
     let (judge_pubkey, judge_privkey) = keys(1);
-
-    let judge_pubkey = judge_pubkey.to_string();
-    let judge_privkey = judge::divide_keys(judge_privkey.to_string(), judge_pubkey.clone());
 
     let signer_pubkey = signer_pubkey.to_string();
     let signer_privkey = signer_privkey.to_string();
 
-    let message = "hoge".to_string();
+    let judge_pubkey = judge_pubkey.to_string();
 
-    sender::new(signer_pubkey.clone(), judge_pubkey.clone());
-    signer::new(signer_privkey, signer_pubkey.clone(), judge_pubkey.clone());
+    signer::new(signer_privkey.clone(), signer_pubkey.clone(), judge_pubkey.clone());
 
-    let blinded_digest = sender::blind(message.clone());
+    let signer_pubkey = utils::to_c_str(signer_pubkey.to_string());
+    let signer_privkey = utils::to_c_str(signer_privkey.to_string());
+    let judge_pubkey = utils::to_c_str(judge_pubkey.to_string());
+
+    new_ios(signer_pubkey, judge_pubkey);
+    
+    let message = utils::to_c_str("aaa".to_string());
+
+    let blinded_digest = blind_ios(message);
+    let blinded_digest = utils::from_c_str(blinded_digest);
+
     signer::set_blinded_digest(blinded_digest);
 
     let subset = signer::setup_subset();
-    sender::set_subset(subset);
+    let subset = utils::to_c_str(subset.to_string());
 
-    let check_parameters = sender::generate_check_parameters();
+    set_subset_ios(subset);
+
+    let check_parameters = generate_check_parameter_ios();
+    let check_parameters = utils::from_c_str(check_parameters);
+
     signer::check(check_parameters);
 
     let blind_signature = signer::sign();
-    let signature = sender::unblind(blind_signature);
+    let blind_signature = utils::to_c_str(blind_signature);
+    let signature = unblind_ios(blind_signature);
 
-    let result = verifyer::verify(signature.clone(), message, signer_pubkey, judge_pubkey);
+    let signature = utils::from_c_str(signature);
+    let message = utils::from_c_str(message);
+    
+    let signer_pubkey = utils::from_c_str(signer_pubkey);
+    let judge_pubkey = utils::from_c_str(judge_pubkey);
+    let result = verifyer::verify(signature, message, signer_pubkey, judge_pubkey.clone());
+
     assert!(result);
 
-    sender::destroy();
+    destroy_ios();
     signer::destroy();
-
-    let result = judge::open(signature, judge_privkey);
-
-    assert_eq!(result[0].as_bytes()[0], "1".as_bytes()[0]);
-    assert_eq!(result[0].as_bytes()[1], "0".as_bytes()[0]);
 }
-*/
 
 
 fn keys(i: usize) -> (&'static str, &'static str) {

@@ -3,6 +3,8 @@ use std::ffi::{CString, CStr};
 
 use aias_core::{sender, utils};
 
+mod tests;
+
 
 #[no_mangle]
 pub extern fn new_ios(signer_pubkey: *const c_char, judge_pubkeys: *const c_char) {
@@ -36,4 +38,9 @@ pub extern fn unblind_ios(to: *const c_char) -> *mut c_char{
     let recipient = utils::from_c_str(to);
     let result = sender::unblind(recipient);
     CString::new(result).unwrap().into_raw()
+}
+
+#[no_mangle]
+pub extern fn destroy_ios() {
+    sender::destroy();
 }

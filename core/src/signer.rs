@@ -120,5 +120,4 @@ impl Signer {
             "".to_string()
         })
     }
-
 }
