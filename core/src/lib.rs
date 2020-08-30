@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 pub mod utils;
 pub mod crypto;
 pub mod sender;

@@ -44,6 +44,7 @@ fn generate_signer() -> FBSSigner<RSAPubKey> {
 }
 
 
+/*
 #[test]
 fn test_init_and_destroy() {
     let signer = generate_signer();
@@ -60,8 +61,8 @@ fn test_init_and_destroy() {
     // let judge_pubkeys = json!(judge_pubkeys).to_string();
     // let judge_pubkeys = utils::to_c_str(keys(1));
 
-    sender::new_ios(signer_pubkey, judge_pubkey);
-    signer::new(signer_privkey, signer_pubkey.clone(), judge_pubkey);
+    //sender::new_ios(signer_pubkey, judge_pubkey);
+    //signer::new(signer_privkey, signer_pubkey.clone(), judge_pubkey);
     verifyer::new_verifyer(signer_pubkey, judge_pubkey);
     
     let message = utils::to_c_str("aaa".to_string());
@@ -85,6 +86,7 @@ fn test_init_and_destroy() {
     signer::destroy();
     verifyer::destroy_verifyer();
 }
+*/
 
 
 fn keys(i: usize) -> (&'static str, &'static str) {
