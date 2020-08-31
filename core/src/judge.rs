@@ -12,9 +12,9 @@ thread_local!(static ODB: RefCell<Option<Judge<DistributedRSAPrivKey>>> = RefCel
 
 
 pub fn divide_keys(prevkey: String, pubkey: String) -> DistributedRSAPrivKey {
-    let mut rng = OsRng;
+    let rng = OsRng;
     let bits = 2048;
-    
+
     let privkey = pem::parse(prevkey).expect("failed to parse pem");
     let privkey = RSAPrivateKey::from_pkcs1(&privkey.contents).expect("failed to parse pkcs1");
 

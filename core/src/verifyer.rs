@@ -13,7 +13,7 @@ use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, Public
 
 
 pub fn verify(signature: String, message: String, signer_pubkey: String, judge_pubkeys: String) -> bool {
-    let mut is_vailed = false;
+    let is_vailed = false;
 
     let signature: Signature = serde_json::from_str(&signature).expect("Parsing json error");
 
