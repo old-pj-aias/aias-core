@@ -7,7 +7,7 @@ use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, Public
 
 
 pub struct Signer {
-    signer: FBSSigner<RSAPubKey>
+    pub signer: FBSSigner<RSAPubKey>
 }
 
 impl Signer {
@@ -35,6 +35,14 @@ impl Signer {
         Signer {
             signer: FBSSigner::new(parameters, signer_privkey)
         }
+    }
+
+    pub fn new_from_params(signer_privkey: String, signer_pubkey: String, judge_pubkey: String, blinded_digest: String, subset: String) -> Self {
+        let mut signer = Signer::new(signer_privkey, signer_pubkey, judge_pubkey);
+        signer.signer.subset = Some(serde_json::from_str(&subset).unwrap());
+        signer.signer.blinded_digest = Some(serde_json::from_str(&blinded_digest).unwrap());
+
+        signer
     }
 
     pub fn set_blinded_digest(&mut self, blinded_digest: String) -> serde_json::Result<()> {
