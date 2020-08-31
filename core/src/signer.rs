@@ -55,7 +55,7 @@ impl Signer {
 
     pub fn setup_subset(&mut self) -> String {
         let subset = self.signer.setup_subset();
-        serde_json::to_string(&subset).unwrap_or("".to_string())
+        serde_json::to_string(&subset).unwrap()
     }
 
     pub fn check(&mut self, check_parameter: String) -> bool {
@@ -64,17 +64,9 @@ impl Signer {
     }
 
     pub fn sign(&self) -> String {
-        let signature = match self.signer.sign() {
-            Some(v) => serde_json::to_string(&v),
-            None => {
-                eprintln!("failed to sign");
-                return "".to_string();
-            }
-        };
+        let signature = self.signer.sign().unwrap();
 
-        signature.unwrap_or_else(|e| {
-            eprintln!("failed to convert to string: {}", e);
-            "".to_string()
-        })
+        let parsed_signature = serde_json::to_string(&signature)
+            .unwrap()
     }
 }
