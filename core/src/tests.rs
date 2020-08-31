@@ -16,7 +16,7 @@ use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, Public
 
 
 #[test]
-fn test_init_and_destroy() {
+fn test_all() {
     let pk1 = r#"-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxXo2zWkciUEZBcm/Exk8
 Zac8NWskP59EAVFlO218xIXOV0FfphPB/tnbQh7GDXddo7XVEptHdHXyJlXXLihb
@@ -64,16 +64,20 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let message = "hoge".to_string();
 
     sender::new(signer_pubkey.clone(), judge_pubkey.clone());
-    let mut signer = Signer::new(signer_privkey, signer_pubkey.clone(), judge_pubkey.clone());
+    let mut signer = Signer::new(signer_privkey.clone(), signer_pubkey.clone(), judge_pubkey.clone());
 
     let blinded_digest = sender::blind(message.clone());
-    signer.set_blinded_digest(blinded_digest).unwrap();
+    signer.set_blinded_digest(blinded_digest.clone()).unwrap();
 
     let subset = signer.setup_subset();
-    sender::set_subset(subset);
+    sender::set_subset(subset.clone());
+
+    let mut signer = Signer::new_from_params(signer_privkey, signer_pubkey.clone(), judge_pubkey.clone(), blinded_digest, subset);
+
 
     let check_parameters = sender::generate_check_parameters();
-    signer.check(check_parameters);
+    let is_valid = signer.check(check_parameters);
+    assert!(is_valid);
 
     let blind_signature = signer.sign();
     let signature = sender::unblind(blind_signature);
