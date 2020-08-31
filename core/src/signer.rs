@@ -66,7 +66,7 @@ impl Signer {
     pub fn sign(&self) -> String {
         let signature = self.signer.sign().unwrap();
 
-        let parsed_signature = serde_json::to_string(&signature)
+        serde_json::to_string(&signature)
             .unwrap()
     }
 }
