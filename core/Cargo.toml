@@ -1,0 +1,25 @@
+[package]
+name = "aias-core"
+version = "0.1.0"
+authors = ["akakou <akakou571@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+fair-blind-signature = { git = "https://github.com/project-aias/fair-blind-signature", rev = "20b451b" }
+distributed-rsa = { git = "https://github.com/project-aias/distributed-rsa", rev="f8b52b6" }
+rsa = "0.3.0"
+rand = "0.7.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+base64 = "0.12.3"
+pem = "0.8.1"
+num-traits = "0.2.12"
+num-bigint-dig = "0.3.0"
+rust-crypto = "0.2.36"
+aes = "0.5.0"
+block-modes = "0.6.1"
+sha2 = "0.9.1"
+hex-literal = "0.2.1"
+libc = "0.2.76"
