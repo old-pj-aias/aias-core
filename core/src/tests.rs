@@ -65,13 +65,9 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     sender::new(signer_pubkey.clone(), judge_pubkey.clone(), 10);
     let ej_and_id = EjAndId {judge_pubkey: judge_pubkey.clone(), id: 10};
-    let ej_and_id = serde_json::json!(ej_and_id).to_string();
-    let test_map: serde_json::Value = serde_json::from_str(&ej_and_id).expect("failed to get map");
+    let ej_and_id_str = serde_json::json!(ej_and_id).to_string();
 
-    println!("{:?}", ej_and_id);
-    println!("map: {:?}", test_map);
-
-    let mut signer = Signer::new(signer_privkey.clone(), signer_pubkey.clone(), ej_and_id.clone());
+    let mut signer = Signer::new(signer_privkey.clone(), signer_pubkey.clone(), ej_and_id);
 
     let blinded_digest = sender::blind(message.clone());
     signer.set_blinded_digest(blinded_digest.clone()).unwrap();
@@ -79,8 +75,7 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let subset = signer.setup_subset();
     sender::set_subset(subset.clone());
 
-    let mut signer = Signer::new_from_params(signer_privkey, signer_pubkey.clone(), ej_and_id, blinded_digest, subset);
-
+    let mut signer = Signer::new_from_params(signer_privkey, signer_pubkey.clone(), ej_and_id_str, blinded_digest, subset);
 
     let check_parameters = sender::generate_check_parameters();
     let is_valid = signer.check(check_parameters);
