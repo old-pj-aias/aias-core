@@ -19,7 +19,7 @@ pub struct EjAndId {
 
 #[derive(Deserialize, Serialize)]
 pub struct ReadyParams {
-    pub ej_and_id: EjAndId,
+    pub judge_pubkey: String,
     pub blinded_digest: BlindedDigest
 }
 
@@ -48,12 +48,11 @@ impl Signer {
         }
     }
 
-    pub fn new_with_blinded_digest(signer_privkey: String, signer_pubkey: String, digest_and_ej_id: String) -> Self {
+    pub fn new_with_blinded_digest(signer_privkey: String, signer_pubkey: String, digest_and_ej: String, id: u32) -> Self {
         let (signer_privkey, signer_pubkey) = Self::parse_keys(signer_privkey, signer_pubkey);
 
-        let digest_and_ej_id = serde_json::from_str(&digest_and_ej_id).expect("failed to parse json");
-        let ReadyParams { ej_and_id, blinded_digest } = digest_and_ej_id;
-        let EjAndId { judge_pubkey, id } = ej_and_id;
+        let digest_and_ej = serde_json::from_str(&digest_and_ej).expect("failed to parse json");
+        let ReadyParams { judge_pubkey, blinded_digest } = digest_and_ej;
 
         let judge_pubkey = pem::parse(judge_pubkey).expect("failed to parse judge public keypem");
         let judge_pubkey = RSAPublicKey::from_pkcs8(&judge_pubkey.contents).expect("failed to parse judge public keypkcs8");
