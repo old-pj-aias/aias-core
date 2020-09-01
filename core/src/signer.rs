@@ -11,14 +11,14 @@ pub struct Signer {
 }
 
 impl Signer {
-    pub fn new(signer_privkey_path: String, signer_pubkey_path: String, judge_pubkey_path: String) -> Self {
-        let signer_privkey = pem::parse(signer_privkey_path).expect("failed to parse signer private key pem");
+    pub fn new(signer_privkey: String, signer_pubkey: String, judge_pubkey: String) -> Self {
+        let signer_privkey = pem::parse(signer_privkey).expect("failed to parse signer private key pem");
         let signer_privkey = RSAPrivateKey::from_pkcs1(&signer_privkey.contents).expect("failed to parse signer private key pkcs1");
 
-        let signer_pubkey = pem::parse(signer_pubkey_path).expect("failed to parse signer public key pem");
+        let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse signer public key pem");
         let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse signer public key pkcs8");
 
-        let judge_pubkey = pem::parse(judge_pubkey_path).expect("failed to parse judge public keypem");
+        let judge_pubkey = pem::parse(judge_pubkey).expect("failed to parse judge public keypem");
         let judge_pubkey = RSAPublicKey::from_pkcs8(&judge_pubkey.contents).expect("failed to parse judge public keypkcs8");
 
         let judge_pubkey = RSAPubKey {
