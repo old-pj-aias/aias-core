@@ -11,12 +11,6 @@ pub struct Signer {
     pub signer: FBSSigner<RSAPubKey>
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct EjAndId {
-    pub judge_pubkey: String,
-    pub id: u32
-}
-
 #[derive(Deserialize, Serialize)]
 pub struct ReadyParams {
     pub judge_pubkey: String,
@@ -24,10 +18,8 @@ pub struct ReadyParams {
 }
 
 impl Signer {
-    pub fn new(signer_privkey: String, signer_pubkey: String, ej_and_id: String) -> Self {
+    pub fn new(signer_privkey: String, signer_pubkey: String, judge_pubkey: String, id: u32) -> Self {
         let (signer_privkey, signer_pubkey) = Self::parse_keys(signer_privkey, signer_pubkey);
-
-        let EjAndId {judge_pubkey, id} = serde_json::from_str(&ej_and_id).expect("failed to parse Ej and ID JSON");
 
         let judge_pubkey = pem::parse(judge_pubkey).expect("failed to parse judge public keypem");
         let judge_pubkey = RSAPublicKey::from_pkcs8(&judge_pubkey.contents).expect("failed to parse judge public keypkcs8");
@@ -65,7 +57,7 @@ impl Signer {
             signer_pubkey: signer_pubkey,
             judge_pubkey: judge_pubkey,
             k: 40,
-            id: id
+            id
         };
 
         let mut signer = Signer { signer: FBSSigner::new(parameters, signer_privkey) };
@@ -73,8 +65,8 @@ impl Signer {
         signer
     }
 
-    pub fn new_from_params(signer_privkey: String, signer_pubkey: String, ej_and_id: String, blinded_digest: String, subset: String) -> Self {
-        let mut signer = Signer::new(signer_privkey, signer_pubkey, ej_and_id);
+    pub fn new_from_params(signer_privkey: String, signer_pubkey: String, judge_pubkey: String, id: u32, blinded_digest: String, subset: String) -> Self {
+        let mut signer = Signer::new(signer_privkey, signer_pubkey, judge_pubkey, id);
 
         signer.signer.subset = Some(serde_json::from_str(&subset).unwrap());
         signer.signer.blinded_digest = Some(serde_json::from_str(&blinded_digest).unwrap());
