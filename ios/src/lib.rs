@@ -1,4 +1,4 @@
-use std::os::raw::c_char;
+use std::os::raw::{c_char, c_uint};
 use std::ffi::{CString, CStr};
 
 use aias_core::{sender, utils};
@@ -7,11 +7,12 @@ mod tests;
 
 
 #[no_mangle]
-pub extern fn new_ios(signer_pubkey: *const c_char, judge_pubkeys: *const c_char) {
+pub extern fn new_ios(signer_pubkey: *const c_char, judge_pubkeys: *const c_char, id: c_uint) {
     let signer_pubkey = utils::from_c_str(signer_pubkey);
     let judge_pubkeys = utils::from_c_str(judge_pubkeys);
+    let id = id as u32;
 
-    sender::new(signer_pubkey, judge_pubkeys);
+    sender::new(signer_pubkey, judge_pubkeys, id);
 }
 
 #[no_mangle]

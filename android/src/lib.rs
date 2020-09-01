@@ -8,13 +8,17 @@ use jni::sys::jstring;
 pub extern "system" fn Java_com_aias_aias_Aias_new(env: JNIEnv,
                                              class: JClass,
                                              input1: JString,
-                                             input2: JString) {
+                                             input2: JString,
+                                             input3: JString) {
     let input1: String = 
         env.get_string(input1).expect("Couldn't get java string!").into();
     let input2: String = 
         env.get_string(input2).expect("Couldn't get java string!").into();
+    let input3: String = 
+        env.get_string(input3).expect("Couldn't get java string!").into();
+    let id: u32 = input3.parse().expect("failed to parse id (u32)");
 
-    sender::new(input1, input2);
+    sender::new(input1, input2, id);
  }
 
 #[no_mangle]

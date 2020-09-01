@@ -63,7 +63,7 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     let message = "hoge".to_string();
 
-    sender::new(signer_pubkey.clone(), judge_pubkey.clone());
+    sender::new(signer_pubkey.clone(), judge_pubkey.clone(), 10);
     let ej_and_id = EjAndId {judge_pubkey: judge_pubkey.clone(), id: 10};
     let ej_and_id = serde_json::json!(ej_and_id).to_string();
     let test_map: serde_json::Value = serde_json::from_str(&ej_and_id).expect("failed to get map");

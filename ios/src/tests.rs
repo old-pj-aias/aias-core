@@ -13,6 +13,7 @@ use std::cell::{RefCell, RefMut};
 use rand::rngs::OsRng;
 use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
 
+use std::os::raw::{c_uint};
 
 use serde_json::json;
 
@@ -74,8 +75,9 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     let signer_pubkey = utils::to_c_str(signer_pubkey);
     let judge_pubkey = utils::to_c_str(judge_pubkey.to_string());
+    let id = 10 as c_uint;
 
-    new_ios(signer_pubkey, judge_pubkey);
+    new_ios(signer_pubkey, judge_pubkey, id);
     
     let message = utils::to_c_str("aaa".to_string());
 
