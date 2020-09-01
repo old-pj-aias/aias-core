@@ -24,14 +24,10 @@ pub struct ReadyParams {
 }
 
 impl Signer {
-    pub fn new(signer_privkey: String, signer_pubkey: String, ej_and_id: EjAndId) -> Self {
-        let signer_privkey = pem::parse(signer_privkey).expect("failed to parse signer private key pem");
-        let signer_privkey = RSAPrivateKey::from_pkcs1(&signer_privkey.contents).expect("failed to parse signer private key pkcs1");
+    pub fn new(signer_privkey: String, signer_pubkey: String, ej_and_id: String) -> Self {
+        let (signer_privkey, signer_pubkey) = Self::parse_keys(signer_privkey, signer_pubkey);
 
-        let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse signer public key pem");
-        let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse signer public key pkcs8");
-
-        let EjAndId {judge_pubkey, id} = ej_and_id;
+        let EjAndId {judge_pubkey, id} = serde_json::from_str(&ej_and_id).expect("failed to parse Ej and ID JSON");
 
         let judge_pubkey = pem::parse(judge_pubkey).expect("failed to parse judge public keypem");
         let judge_pubkey = RSAPublicKey::from_pkcs8(&judge_pubkey.contents).expect("failed to parse judge public keypkcs8");
@@ -53,17 +49,32 @@ impl Signer {
     }
 
     pub fn new_with_blinded_digest(signer_privkey: String, signer_pubkey: String, digest_and_ej_id: String) -> Self {
+        let (signer_privkey, signer_pubkey) = Self::parse_keys(signer_privkey, signer_pubkey);
+
         let digest_and_ej_id = serde_json::from_str(&digest_and_ej_id).expect("failed to parse json");
         let ReadyParams { ej_and_id, blinded_digest } = digest_and_ej_id;
+        let EjAndId { judge_pubkey, id } = ej_and_id;
 
-        let mut signer = Self::new(signer_privkey, signer_pubkey, ej_and_id);
+        let judge_pubkey = pem::parse(judge_pubkey).expect("failed to parse judge public keypem");
+        let judge_pubkey = RSAPublicKey::from_pkcs8(&judge_pubkey.contents).expect("failed to parse judge public keypkcs8");
+
+        let judge_pubkey = RSAPubKey {
+            public_key: judge_pubkey
+        };
+
+        let parameters = FBSParameters {
+            signer_pubkey: signer_pubkey,
+            judge_pubkey: judge_pubkey,
+            k: 40,
+            id: id
+        };
+
+        let mut signer = Signer { signer: FBSSigner::new(parameters, signer_privkey) };
         signer.signer.set_blinded_digest(blinded_digest);
-
         signer
     }
 
     pub fn new_from_params(signer_privkey: String, signer_pubkey: String, ej_and_id: String, blinded_digest: String, subset: String) -> Self {
-        let ej_and_id: EjAndId = serde_json::from_str(&ej_and_id).expect("failed to parse json");
         let mut signer = Signer::new(signer_privkey, signer_pubkey, ej_and_id);
 
         signer.signer.subset = Some(serde_json::from_str(&subset).unwrap());
@@ -95,5 +106,15 @@ impl Signer {
 
         serde_json::to_string(&signature)
             .unwrap()
+    }
+
+    fn parse_keys(privkey: String, pubkey: String) -> (RSAPrivateKey, RSAPublicKey) {
+        let privkey = pem::parse(privkey).expect("failed to parse signer private key pem");
+        let privkey = RSAPrivateKey::from_pkcs1(&privkey.contents).expect("failed to parse signer private key pkcs1");
+
+        let pubkey = pem::parse(pubkey).expect("failed to parse signer public key pem");
+        let pubkey = RSAPublicKey::from_pkcs8(&pubkey.contents).expect("failed to parse signer public key pkcs8");
+
+        (privkey, pubkey)
     }
 }

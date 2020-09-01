@@ -67,7 +67,7 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let ej_and_id = EjAndId {judge_pubkey: judge_pubkey.clone(), id: 10};
     let ej_and_id_str = serde_json::json!(ej_and_id).to_string();
 
-    let mut signer = Signer::new(signer_privkey.clone(), signer_pubkey.clone(), ej_and_id);
+    let mut signer = Signer::new(signer_privkey.clone(), signer_pubkey.clone(), ej_and_id_str.clone());
 
     let blinded_digest = sender::blind(message.clone());
     signer.set_blinded_digest(blinded_digest.clone()).unwrap();
