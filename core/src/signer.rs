@@ -18,11 +18,11 @@ pub struct EjAndId {
 }
 
 impl Signer {
-    pub fn new(signer_privkey_path: String, signer_pubkey_path: String, ej_and_id: String) -> Self {
-        let signer_privkey = pem::parse(signer_privkey_path).expect("failed to parse signer private key pem");
+    pub fn new(signer_privkey: String, signer_pubkey: String, ej_and_id: String) -> Self {
+        let signer_privkey = pem::parse(signer_privkey).expect("failed to parse signer private key pem");
         let signer_privkey = RSAPrivateKey::from_pkcs1(&signer_privkey.contents).expect("failed to parse signer private key pkcs1");
 
-        let signer_pubkey = pem::parse(signer_pubkey_path).expect("failed to parse signer public key pem");
+        let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse signer public key pem");
         let signer_pubkey = RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse signer public key pkcs8");
 
         let ej_and_id: EjAndId = serde_json::from_str(&ej_and_id).expect("failed to get ej or id");
