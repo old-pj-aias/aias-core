@@ -1,6 +1,8 @@
 use crate::crypto::{RSAPubKey};
 use crate::utils;
 
+use crate::signer::{ReadyParams};
+
 
 
 
@@ -50,6 +52,22 @@ pub fn blind(message: String) -> String {
         let (digest, _ , _, _) = sender.blind(message).unwrap();
 
         serialized = serde_json::to_string(&digest).unwrap();
+    });
+
+    serialized
+}
+
+pub fn generate_ready_parameters(message: String, judge_pubkey: String) -> String {
+    let mut serialized = "".to_string();
+
+    ODB.with(|odb_cell| { 
+        let mut odb = odb_cell.borrow_mut();
+        let sender = odb.as_mut().unwrap();
+        let (digest, _ , _, _) = sender.blind(message).unwrap();
+
+        let params = ReadyParams { judge_pubkey, blinded_digest: digest };
+
+        serialized = serde_json::to_string(&params).unwrap();
     });
 
     serialized

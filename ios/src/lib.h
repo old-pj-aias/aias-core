@@ -2,6 +2,8 @@
 
 const char *blind_ios(const char *to);
 
+const char *generate_ready_parameter_ios(const char *to, const char *judge_pubkey);
+
 void destroy_ios();
 
 const char *generate_check_parameter_ios();
