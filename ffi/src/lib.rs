@@ -2,6 +2,7 @@ use std::os::raw::{c_char, c_int};
 
 use aias_core::{verifyer, utils};
 
+#[no_mangle]
 pub fn verify(signature: *const c_char, message: *const c_char, signer_pubkey: *const c_char, judge_pubkeys: *const c_char) -> c_int {
     let signature_str = utils::from_c_str(signature);
     let message_str = utils::from_c_str(message);
