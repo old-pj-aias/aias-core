@@ -1,4 +1,4 @@
-use super::{new_ios, blind_ios, set_subset_ios, generate_check_parameter_ios, unblind_ios, destroy_ios};
+use super::{new_ios, blind_ios, set_subset_ios, generate_check_parameter_ios, generate_ready_parameter_ios, unblind_ios, destroy_ios};
 
 use aias_core::signer;
 use aias_core::verifyer;
@@ -68,23 +68,21 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     let judge_pubkey = pk1.to_string();
 
-    let mut signer = Signer::new(signer_privkey.clone(), signer_pubkey.clone(), judge_pubkey.clone(), 10);
-
 
     let judge_pubkey = pk1.to_string();
 
-    let signer_pubkey = utils::to_c_str(signer_pubkey);
-    let judge_pubkey = utils::to_c_str(judge_pubkey.to_string());
+    let signer_pubkey_c = utils::to_c_str(signer_pubkey.clone());
+    let judge_pubkey_c = utils::to_c_str(judge_pubkey.to_string());
     let id = 10 as c_uint;
 
-    new_ios(signer_pubkey, judge_pubkey, id);
+    new_ios(signer_pubkey_c, judge_pubkey_c, id);
     
     let message = utils::to_c_str("aaa".to_string());
 
-    let blinded_digest = blind_ios(message);
-    let blinded_digest = utils::from_c_str(blinded_digest);
+    let ready_params = generate_ready_parameter_ios(message, judge_pubkey_c);
+    let ready_params_str = utils::from_c_str(ready_params);
 
-    signer.set_blinded_digest(blinded_digest).unwrap();
+    let mut signer = Signer::new_with_blinded_digest(signer_privkey.clone(), signer_pubkey.clone(), ready_params_str, 10);
 
     let subset = signer.setup_subset();
     let subset = utils::to_c_str(subset.to_string());
@@ -103,8 +101,8 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let signature = utils::from_c_str(signature);
     let message = utils::from_c_str(message);
     
-    let signer_pubkey = utils::from_c_str(signer_pubkey);
-    let judge_pubkey = utils::from_c_str(judge_pubkey);
+    let signer_pubkey = utils::from_c_str(signer_pubkey_c);
+    let judge_pubkey = utils::from_c_str(judge_pubkey_c);
     let result = verifyer::verify(signature, message, signer_pubkey, judge_pubkey.clone());
 
     assert!(result);
