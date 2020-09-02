@@ -16,14 +16,6 @@ pub extern fn new_ios(signer_pubkey: *const c_char, judge_pubkeys: *const c_char
 }
 
 #[no_mangle]
-pub extern fn blind_ios(to: *const c_char) -> *mut c_char {
-    let recipient = utils::from_c_str(to);
-
-    let result = sender::blind(recipient.to_string());
-    utils::to_c_str(result)
-}
-
-#[no_mangle]
 pub extern fn generate_ready_parameter_ios(to: *const c_char, judge_pubkey: *const c_char) -> *mut c_char{
     let recipient = utils::from_c_str(to);
     let pk = utils::from_c_str(judge_pubkey);

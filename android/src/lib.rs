@@ -21,16 +21,21 @@ pub extern "system" fn Java_com_aias_aias_Aias_new(env: JNIEnv,
     sender::new(input1, input2, id);
  }
 
+
 #[no_mangle]
-pub extern "system" fn Java_com_aias_aias_Aias_blind(env: JNIEnv,
+pub extern "system" fn Java_com_aias_aias_Aias_ready(env: JNIEnv,
                                              class: JClass,
-                                             input: JString) -> jstring {
-    let input: String = 
-        env.get_string(input).expect("Couldn't get java string!").into();
+                                             input1: JString,
+                                             input2: JString) -> jstring {
+    let input1: String = 
+        env.get_string(input1).expect("Couldn't get java string!").into();
+    
+    let input2: String = 
+        env.get_string(input2).expect("Couldn't get java string!").into();
 
-    let output = sender::blind(input);
+    let result = sender::generate_ready_parameters(input1, input2);
 
-    let output = env.new_string(output)
+    let output = env.new_string(result)
         .expect("Couldn't create java string!");
 
     output.into_inner()
