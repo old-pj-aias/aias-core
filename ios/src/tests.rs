@@ -68,7 +68,7 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     let judge_pubkey = pk1.to_string();
 
-    let mut signer = Signer::new(signer_privkey.clone(), signer_pubkey.clone(), judge_pubkey.clone());
+    let mut signer = Signer::new(signer_privkey.clone(), signer_pubkey.clone(), judge_pubkey.clone(), 10);
 
 
     let judge_pubkey = pk1.to_string();
