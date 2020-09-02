@@ -1,0 +1,1 @@
+int verify(const char *signature, const char *message, const char *signer_pubkey, const char *judge_pubkeys);

@@ -1,13 +1,14 @@
 [package]
-name = "aias-go"
+name = "ios"
 version = "0.1.0"
-authors = ["akakou <akakou571@gmail.com>"]
+authors = ["kino-ma <kino.ma.ms@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[lib]
-crate-type = ["cdylib"]
-
 [dependencies]
 aias-core = { path = "../core" }
+
+[lib]
+name = "lib"
+crate-type = ["staticlib", "cdylib"]
