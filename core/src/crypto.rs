@@ -17,6 +17,7 @@ pub struct DistributedRSAPrivKey {
     pub private_key_set: DistributedRSAPrivateKeySet
 }
 
+#[derive(Clone)]
 pub struct RSAPubKey {
     pub public_key: RSAPublicKey
 }
