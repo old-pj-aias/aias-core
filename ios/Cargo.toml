@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-fair-blind-signature = { git = "https://github.com/project-aias/fair-blind-signature", rev = "20b451b" }
+fair-blind-signature = { git = "https://github.com/project-aias/fair-blind-signature", rev = "2565e6d" }
 aias-core = { path = "../core" }
 rsa = "0.3.0"
 rand = "0.7.3"
