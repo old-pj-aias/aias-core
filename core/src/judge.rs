@@ -1,6 +1,6 @@
 use crate::crypto::{DistributedRSAPrivKey, RSAPubKey};
 
-use fair_blind_signature::{ Signature, Judge };
+use fair_blind_signature::{ Signature, Judge, EncryptedID };
 use serde_json;
 
 use rsa::{RSAPrivateKey, RSAPublicKey, BigUint};
@@ -27,18 +27,17 @@ impl ShareSet {
         Ok(ShareSet { share_set })
     }
 
-    pub fn open_id(&self) -> Result<Vec<u8>, String> {
+    pub fn open_id(&self) -> Result<String, String> {
         let decrypted = self.share_set.decrypt();
         let decrypted_bytes = decrypted.to_bytes_le();
-        /*
         let decrypted_str = String::from_utf8(decrypted_bytes)
-            .map_err(|e| format!("failed to convert decrypted data into string: {}", e))?;
+            .map_err(|e| format!("failed to convert bytes into string: {}", e))?;
+
+        eprintln!("decrypted: {}", decrypted_str);
+        let v = decrypted_str.split(':').next()
+            .ok_or(format!("failed to get ID part"))?;
         
-        let id_and_beta = serde_json::from_str(&decrypted_str)
-            .map_err(|e| format!("failde to serde json: {}", e))?;
-            */
-        
-        Ok(decrypted_bytes)
+        Ok(v.to_string())
     }
 }
 
@@ -58,8 +57,7 @@ pub fn divide_keys(prevkey: String, pubkey: String) -> DistributedRSAPrivKey {
     return privkey;
 }
 
-pub fn open(plain_shares: Vec<String>) -> Result<Vec<u8>, String> {
-    //eprintln!("{:?}", plain_shares);
+pub fn open(plain_shares: Vec<String>) -> Result<String, String> {
     let share_set = ShareSet::from_shares_vec(plain_shares)
         .map_err(|e| format!("failed to create share set: {}", e))?;
     share_set.open_id()

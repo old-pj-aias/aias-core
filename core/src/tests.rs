@@ -108,7 +108,7 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     let result = judge::open(plain_shares).unwrap();
 
-    assert_eq!(result[0..=1], b"10"[..]);
+    assert_eq!(&result, "10");
 }
 
 
@@ -203,5 +203,5 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     let result = judge::open(plain_shares).unwrap();
 
-    assert_eq!(result[0..=1], b"10"[0..=1]);
+    assert_eq!(&result, "10");
 }
