@@ -86,19 +86,9 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let signature: Signature = serde_json::from_str(&signature_str).unwrap();
 
     let encrypted_id = &signature.encrypted_id.v[0];
-    let id_bytes = encrypted_id.as_bytes();
-    let id_int = BigUint::from_bytes_le(id_bytes);
+    let id_int: BigUint = serde_json::from_str(&encrypted_id).unwrap();
 
-    //let msg = b"hoge";
-    //let cipher = BigUint::from_bytes_le(msg);
-    let mut shares = Vec::new();
 
-    for key in &judge_privkey.private_key_set.private_keys {
-        let share = key.generate_share(id_int.clone());
-        shares.push(share);
-    }
-
-    /*
     let plain_shares = judge_privkey
         .private_key_set
         .private_keys
@@ -108,28 +98,20 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
             serde_json::to_string(&share).unwrap()
         })
         .collect();
-        */
 
-    //let mut buf = String::new();
-    //let mut plain_shares = Vec::new();
+    let result = verifyer::verify(signature_str.clone(), message, signer_pubkey, judge_pubkey);
+    assert!(result);
 
-    //let plain_shares = shares_txt.to_string().split('\n').map(|s| s.to_string()).collect();
+    sender::destroy();
 
-    //let result = verifyer::verify(signature_str.clone(), message, signer_pubkey, judge_pubkey);
-    //assert!(result);
+    let id_bytes = id_int.to_bytes_le();
 
-    //sender::destroy();
-
-    let plain_shares = shares.iter().map(|k| serde_json::to_string(k).unwrap()).collect();
     let result = judge::open(plain_shares).unwrap();
-    //let result_str = String::from_utf8_lossy(&result);
-    //println!("result: {:?}", result);
 
-    assert_eq!(result, id_bytes);
+    assert_eq!(result[0..=1], b"10"[..]);
 }
 
 
-/*
 #[test]
 #[ignore]
 fn test_ready_params() {
@@ -204,9 +186,22 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     sender::destroy();
 
-    let result = judge::open(plain_shares);
+    let signature: Signature = serde_json::from_str(&signature).unwrap();
+    let encrypted_id = &signature.encrypted_id.v[0];
 
-    assert_eq!(result[0].as_bytes()[0], "1".as_bytes()[0]);
-    assert_eq!(result[0].as_bytes()[1], "0".as_bytes()[0]);
+    let id_int: BigUint = serde_json::from_str(&encrypted_id).unwrap();
+
+    let plain_shares = judge_privkey
+        .private_key_set
+        .private_keys
+        .iter()
+        .map(|k| {
+            let share = k.generate_share(id_int.clone());
+            serde_json::to_string(&share).unwrap()
+        })
+        .collect();
+
+    let result = judge::open(plain_shares).unwrap();
+
+    assert_eq!(result[0..=1], b"10"[0..=1]);
 }
-*/

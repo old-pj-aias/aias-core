@@ -3,7 +3,7 @@ use crate::crypto::{DistributedRSAPrivKey, RSAPubKey};
 use fair_blind_signature::{ Signature, Judge };
 use serde_json;
 
-use rsa::{RSAPrivateKey, RSAPublicKey};
+use rsa::{RSAPrivateKey, RSAPublicKey, BigUint};
 use std::cell::RefCell; 
 use rand::rngs::OsRng;
 use fair_blind_signature::EJPrivKey;
