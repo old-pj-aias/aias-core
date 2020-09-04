@@ -7,7 +7,7 @@ use crate::verifyer;
 use crate::utils;
 use crate::crypto;
 
-use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, BlindSignature, Subset, FBSSigner, CheckParameter };
+use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, BlindSignature, Subset, FBSSigner, CheckParameter, Signature };
 use std::cell::{RefCell, RefMut}; 
 
 use rand::rngs::OsRng;
@@ -81,20 +81,35 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     assert!(is_valid);
 
     let blind_signature = signer.sign();
-    let signature = sender::unblind(blind_signature);
+    let signature_str = sender::unblind(blind_signature);
+    let signature: Signature = serde_json::from_str(&signature_str).unwrap();
 
-    let result = verifyer::verify(signature.clone(), message, signer_pubkey, judge_pubkey);
+    let encrypted_id = &signature.encrypted_id.v[0];
+    let id_bytes = BigUint::from_bytes_le(encrypted_id.as_bytes());
+
+    let plain_shares = judge_privkey
+        .private_key_set
+        .private_keys
+        .iter()
+        .map(|k| {
+            let share = k.generate_share(id_bytes.clone());
+            serde_json::to_string(&share).unwrap()
+        })
+        .collect();
+
+    let result = verifyer::verify(signature_str.clone(), message, signer_pubkey, judge_pubkey);
     assert!(result);
 
     sender::destroy();
 
-    let result = judge::open(signature, judge_privkey);
+    let result = judge::open(plain_shares).unwrap();
 
-    assert_eq!(result[0].as_bytes()[0], "1".as_bytes()[0]);
-    assert_eq!(result[0].as_bytes()[1], "0".as_bytes()[0]);
+    assert_eq!(result[0], "1".as_bytes()[0]);
+    assert_eq!(result[1], "0".as_bytes()[0]);
 }
 
 
+/*
 #[test]
 #[ignore]
 fn test_ready_params() {
@@ -169,8 +184,9 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     sender::destroy();
 
-    let result = judge::open(signature, judge_privkey);
+    let result = judge::open(plain_shares);
 
     assert_eq!(result[0].as_bytes()[0], "1".as_bytes()[0]);
     assert_eq!(result[0].as_bytes()[1], "0".as_bytes()[0]);
 }
+*/

@@ -7,8 +7,40 @@ use rsa::{RSAPrivateKey, RSAPublicKey};
 use std::cell::RefCell; 
 use rand::rngs::OsRng;
 use fair_blind_signature::EJPrivKey;
+use distributed_rsa::{PlainShare,PlainShareSet};
 
 thread_local!(static ODB: RefCell<Option<Judge<DistributedRSAPrivKey>>> = RefCell::new(None)); 
+
+
+pub struct ShareSet {
+    pub share_set: PlainShareSet
+}
+
+impl ShareSet {
+    pub fn from_shares_vec(src: Vec<String>) -> serde_json::Result<Self> {
+        let mut plain_shares = Vec::new();
+        for share in &src {
+            plain_shares.push(serde_json::from_str(share)?)
+        }
+
+        let share_set = PlainShareSet { plain_shares };
+        Ok(ShareSet { share_set })
+    }
+
+    pub fn open_id(&self) -> Result<Vec<u8>, String> {
+        let decrypted = self.share_set.decrypt();
+        let decrypted_bytes = decrypted.to_bytes_le();
+        /*
+        let decrypted_str = String::from_utf8(decrypted_bytes)
+            .map_err(|e| format!("failed to convert decrypted data into string: {}", e))?;
+        
+        let id_and_beta = serde_json::from_str(&decrypted_str)
+            .map_err(|e| format!("failde to serde json: {}", e))?;
+            */
+        
+        Ok(decrypted_bytes)
+    }
+}
 
 
 pub fn divide_keys(prevkey: String, pubkey: String) -> DistributedRSAPrivKey {
@@ -26,9 +58,9 @@ pub fn divide_keys(prevkey: String, pubkey: String) -> DistributedRSAPrivKey {
     return privkey;
 }
 
-pub fn open(signature: String, judge_privkey: DistributedRSAPrivKey) -> Vec<String> {
-    let signature : Signature = serde_json::from_str(&signature).unwrap();
-
-    let judge = Judge::new(judge_privkey);
-    judge.open(signature.encrypted_id)
+pub fn open(plain_shares: Vec<String>) -> Result<Vec<u8>, String> {
+    eprintln!("{:?}", plain_shares);
+    let share_set = ShareSet::from_shares_vec(plain_shares)
+        .map_err(|e| format!("failed to create share set: {}", e))?;
+    share_set.open_id()
 }
