@@ -33,7 +33,6 @@ impl ShareSet {
         let decrypted_str = String::from_utf8(decrypted_bytes)
             .map_err(|e| format!("failed to convert bytes into string: {}", e))?;
 
-        eprintln!("decrypted: {}", decrypted_str);
         let v = decrypted_str.split(':').next()
             .ok_or(format!("failed to get ID part"))?;
         
