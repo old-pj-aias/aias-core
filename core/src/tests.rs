@@ -87,12 +87,15 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let encrypted_id = &signature.encrypted_id.v[0];
     let id_bytes = BigUint::from_bytes_le(encrypted_id.as_bytes());
 
+    let msg = b"hoge";
+    let cipher = BigUint::from_bytes_le(msg);
+
     let plain_shares = judge_privkey
         .private_key_set
         .private_keys
         .iter()
         .map(|k| {
-            let share = k.generate_share(id_bytes.clone());
+            let share = k.generate_share(cipher.clone());
             serde_json::to_string(&share).unwrap()
         })
         .collect();
@@ -103,9 +106,11 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     sender::destroy();
 
     let result = judge::open(plain_shares).unwrap();
+    //let result_str = String::from_utf8_lossy(&result);
+    println!("result: {:?}", result);
 
-    assert_eq!(result[0], "1".as_bytes()[0]);
-    assert_eq!(result[1], "0".as_bytes()[0]);
+    assert_eq!(result[0], msg[0]);
+    assert_eq!(result[1], msg[0]);
 }
 
 

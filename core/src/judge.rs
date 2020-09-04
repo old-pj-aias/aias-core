@@ -59,7 +59,7 @@ pub fn divide_keys(prevkey: String, pubkey: String) -> DistributedRSAPrivKey {
 }
 
 pub fn open(plain_shares: Vec<String>) -> Result<Vec<u8>, String> {
-    eprintln!("{:?}", plain_shares);
+    //eprintln!("{:?}", plain_shares);
     let share_set = ShareSet::from_shares_vec(plain_shares)
         .map_err(|e| format!("failed to create share set: {}", e))?;
     share_set.open_id()
