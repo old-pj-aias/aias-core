@@ -57,7 +57,7 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 -----END RSA PRIVATE KEY-----"#;
 
     let judge_pubkey = pk1.to_string();
-    let judge_privkey = judge::divide_keys(sk1.to_string(), judge_pubkey.clone());
+    let judge_privkey = judge::divide_keys(sk1.to_string(), judge_pubkey.clone(), 10);
 
     let signer_pubkey = pk1.to_string();
     let signer_privkey = sk1.to_string();
@@ -154,7 +154,7 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 -----END RSA PRIVATE KEY-----"#;
 
     let judge_pubkey = pk1.to_string();
-    let judge_privkey = judge::divide_keys(sk1.to_string(), judge_pubkey.clone());
+    let judge_privkey = judge::divide_keys(sk1.to_string(), judge_pubkey.clone(), 10);
 
     let signer_pubkey = pk1.to_string();
     let signer_privkey = sk1.to_string();

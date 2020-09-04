@@ -43,13 +43,14 @@ impl EJPubKey for RSAPubKey {
 impl DistributedRSAPrivKey {
     pub fn new (
             private_key: &RSAPrivateKey,
-            public_key: &RSAPublicKey) -> Self {
+            public_key: &RSAPublicKey,
+            count: u32) -> Self {
 
-        let private_key_set = DistributedRSAPrivateKeySet::from_rsa_private_key(private_key, public_key, 10, 1024).unwrap();
-        
+        let private_key_set = DistributedRSAPrivateKeySet::from_rsa_private_key(private_key, public_key, count, 1024).unwrap();
+
         DistributedRSAPrivKey { private_key_set: private_key_set }
     }
-    
+
     pub fn decrypt_core(&self, cipher: BigUint) -> BigUint {
         let mut shares = Vec::new();
 
@@ -117,7 +118,7 @@ fn test_encrypt_and_decrypt_rsa1() {
 
     let data = BigUint::from_bytes_be(b"!!");
     
-    let private_key = DistributedRSAPrivKey::new(&private_key, &public_key);
+    let private_key = DistributedRSAPrivKey::new(&private_key, &public_key, 10);
     let public_key = RSAPubKey { public_key: public_key };
 
     let encrypted = public_key.encrypt_core(data.clone());
@@ -136,7 +137,7 @@ fn test_encrypt_and_decrypt_rsa2() {
     let private_key = RSAPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
     let public_key = RSAPublicKey::from(&private_key);
     
-    let private_key = DistributedRSAPrivKey::new(&private_key, &public_key);
+    let private_key = DistributedRSAPrivKey::new(&private_key, &public_key, 10);
     let public_key = RSAPubKey { public_key: public_key };
 
     let data = "aaa".to_string();

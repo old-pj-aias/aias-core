@@ -41,7 +41,7 @@ impl ShareSet {
 }
 
 
-pub fn divide_keys(prevkey: String, pubkey: String) -> DistributedRSAPrivKey {
+pub fn divide_keys(prevkey: String, pubkey: String, count: u32) -> DistributedRSAPrivKey {
     let rng = OsRng;
     let bits = 2048;
 
@@ -51,7 +51,7 @@ pub fn divide_keys(prevkey: String, pubkey: String) -> DistributedRSAPrivKey {
     let pubkey = pem::parse(pubkey).expect("failed to parse pem");
     let pubkey = RSAPublicKey::from_pkcs8(&pubkey.contents).expect("failed to parse pkcs8");
 
-    let privkey = DistributedRSAPrivKey::new(&privkey, &pubkey);
+    let privkey = DistributedRSAPrivKey::new(&privkey, &pubkey, count);
 
     return privkey;
 }
