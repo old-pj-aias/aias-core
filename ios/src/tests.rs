@@ -1,4 +1,4 @@
-use super::{new_ios, blind_ios, set_subset_ios, generate_check_parameter_ios, generate_ready_parameter_ios, unblind_ios, destroy_ios};
+use super::{new_ios, set_subset_ios, generate_check_parameter_ios, generate_ready_parameter_ios, unblind_ios, destroy_ios};
 
 use aias_core::signer;
 use aias_core::verifyer;
