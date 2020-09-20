@@ -1,8 +1,9 @@
-use std::ffi::{CStr, CString};
+use std::ffi::CString;
 use std::os::raw::{c_char, c_uint};
 
 use aias_core::{sender, utils};
 
+#[cfg(test)]
 mod tests;
 
 #[no_mangle]

@@ -3,25 +3,13 @@ use super::{
     set_subset_ios, unblind_ios,
 };
 
-use aias_core::signer;
 use aias_core::signer::Signer;
 use aias_core::verifyer;
 
-use aias_core::crypto::RSAPubKey;
 use aias_core::utils;
-
-use fair_blind_signature::{
-    BlindSignature, BlindedDigest, CheckParameter, EJPubKey, FBSParameters, FBSSender, FBSSigner,
-    Subset,
-};
-use std::cell::{RefCell, RefMut};
-
-use rand::rngs::OsRng;
-use rsa::{BigUint, PaddingScheme, PublicKey, PublicKeyParts, RSAPrivateKey, RSAPublicKey};
 
 use std::os::raw::c_uint;
 
-use serde_json::json;
 
 #[test]
 fn test_init_and_destroy() {
@@ -63,12 +51,8 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 0sVQIY0n9eLL7sg5aCUpGKf4Qc88wF8OPYnBzjCeiJusjkGhQ5rqdQ==
 -----END RSA PRIVATE KEY-----"#;
 
-    let message = "hoge".to_string();
-
     let signer_pubkey = pk1.to_string();
     let signer_privkey = sk1.to_string();
-
-    let judge_pubkey = pk1.to_string();
 
     let judge_pubkey = pk1.to_string();
 
