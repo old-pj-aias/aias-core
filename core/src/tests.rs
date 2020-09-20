@@ -1,21 +1,11 @@
-use crate::crypto::{DistributedRSAPrivKey, RSAPubKey};
 use crate::judge;
 use crate::sender;
 use crate::signer::Signer;
 use crate::verifyer;
 
-use crate::crypto;
-use crate::utils;
+use fair_blind_signature::Signature;
 
-use distributed_rsa::PlainShareSet;
-use fair_blind_signature::{
-    BlindSignature, BlindedDigest, CheckParameter, EJPubKey, FBSParameters, FBSSender, FBSSigner,
-    Signature, Subset,
-};
-use std::cell::{RefCell, RefMut};
-
-use rand::rngs::OsRng;
-use rsa::{BigUint, PaddingScheme, PublicKey, PublicKeyParts, RSAPrivateKey, RSAPublicKey};
+use rsa::BigUint;
 
 #[test]
 fn test_all() {
@@ -115,8 +105,6 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     assert!(result);
 
     sender::destroy();
-
-    let id_bytes = id_int.to_bytes_le();
 
     let result = judge::open(plain_shares).unwrap();
 

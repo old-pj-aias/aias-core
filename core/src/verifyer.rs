@@ -1,17 +1,11 @@
 use crate::crypto::RSAPubKey;
-use crate::utils;
-
-use std::ffi::{CStr, CString};
-use std::os::raw::c_char;
 
 use fair_blind_signature::{
-    BlindSignature, BlindedDigest, CheckParameter, EJPubKey, FBSParameters, FBSSender, FBSSigner,
-    FBSVerifyer, Signature, Subset,
+    FBSParameters,
+    FBSVerifyer, Signature,
 };
-use std::cell::{RefCell, RefMut};
 
-use rand::rngs::OsRng;
-use rsa::{BigUint, PaddingScheme, PublicKey, PublicKeyParts, RSAPrivateKey, RSAPublicKey};
+use rsa::RSAPublicKey;
 
 pub fn verify(
     signature: String,
@@ -19,8 +13,6 @@ pub fn verify(
     signer_pubkey: String,
     judge_pubkeys: String,
 ) -> bool {
-    let is_vailed = false;
-
     let signature: Signature = serde_json::from_str(&signature).expect("Parsing json error");
 
     let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");

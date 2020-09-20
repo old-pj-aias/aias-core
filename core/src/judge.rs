@@ -1,12 +1,10 @@
-use crate::crypto::{DistributedRSAPrivKey, RSAPubKey};
+use crate::crypto::{DistributedRSAPrivKey};
 
-use fair_blind_signature::{EncryptedID, Judge, Signature};
+use fair_blind_signature::{Judge};
 use serde_json;
 
-use distributed_rsa::{PlainShare, PlainShareSet};
-use fair_blind_signature::EJPrivKey;
-use rand::rngs::OsRng;
-use rsa::{BigUint, RSAPrivateKey, RSAPublicKey};
+use distributed_rsa::{PlainShareSet};
+use rsa::{RSAPrivateKey, RSAPublicKey};
 use std::cell::RefCell;
 
 thread_local!(static ODB: RefCell<Option<Judge<DistributedRSAPrivKey>>> = RefCell::new(None));
@@ -42,9 +40,6 @@ impl ShareSet {
 }
 
 pub fn divide_keys(prevkey: String, pubkey: String, count: u32) -> DistributedRSAPrivKey {
-    let rng = OsRng;
-    let bits = 2048;
-
     let privkey = pem::parse(prevkey).expect("failed to parse pem");
     let privkey = RSAPrivateKey::from_pkcs1(&privkey.contents).expect("failed to parse pkcs1");
 

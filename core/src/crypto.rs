@@ -5,11 +5,8 @@ use distributed_rsa::{DistributedRSAPrivateKeySet, PlainShareSet};
 use fair_blind_signature::EJPrivKey;
 use fair_blind_signature::EJPubKey;
 
-use rsa::{BigUint, PublicKey, PublicKeyParts, RSAPrivateKey, RSAPublicKey};
+use rsa::{BigUint, PublicKeyParts, RSAPrivateKey, RSAPublicKey};
 
-use serde::{Deserialize, Serialize};
-
-use std::str::FromStr;
 
 pub struct DistributedRSAPrivKey {
     pub private_key_set: DistributedRSAPrivateKeySet,

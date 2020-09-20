@@ -1,16 +1,14 @@
 use crate::crypto::RSAPubKey;
-use crate::utils;
 
 use crate::signer::ReadyParams;
 
 use fair_blind_signature::{
-    BlindSignature, BlindedDigest, CheckParameter, EJPubKey, FBSParameters, FBSSender, FBSSigner,
+    BlindSignature, FBSParameters, FBSSender,
     Subset,
 };
-use std::cell::{RefCell, RefMut};
+use std::cell::{RefCell};
 
-use rand::rngs::OsRng;
-use rsa::{BigUint, PaddingScheme, PublicKey, PublicKeyParts, RSAPrivateKey, RSAPublicKey};
+use rsa::{RSAPublicKey};
 
 thread_local!(static ODB: RefCell<Option<FBSSender<RSAPubKey>>> = RefCell::new(None));
 
