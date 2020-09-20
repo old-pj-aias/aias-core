@@ -1,20 +1,21 @@
-use crate::crypto::{RSAPubKey, DistributedRSAPrivKey};
+use crate::crypto::{DistributedRSAPrivKey, RSAPubKey};
 use crate::judge;
-use crate::signer::{Signer};
 use crate::sender;
+use crate::signer::Signer;
 use crate::verifyer;
 
-use crate::utils;
 use crate::crypto;
+use crate::utils;
 
-use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, BlindSignature, Subset, FBSSigner, CheckParameter, Signature };
-use std::cell::{RefCell, RefMut}; 
 use distributed_rsa::PlainShareSet;
+use fair_blind_signature::{
+    BlindSignature, BlindedDigest, CheckParameter, EJPubKey, FBSParameters, FBSSender, FBSSigner,
+    Signature, Subset,
+};
+use std::cell::{RefCell, RefMut};
 
 use rand::rngs::OsRng;
-use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
-
-
+use rsa::{BigUint, PaddingScheme, PublicKey, PublicKeyParts, RSAPrivateKey, RSAPublicKey};
 
 #[test]
 fn test_all() {
@@ -67,7 +68,12 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     sender::new(signer_pubkey.clone(), judge_pubkey.clone(), 10);
 
-    let mut signer = Signer::new(signer_privkey.clone(), signer_pubkey.clone(), judge_pubkey.clone(), id);
+    let mut signer = Signer::new(
+        signer_privkey.clone(),
+        signer_pubkey.clone(),
+        judge_pubkey.clone(),
+        id,
+    );
 
     let blinded_digest = sender::blind(message.clone());
     signer.set_blinded_digest(blinded_digest.clone()).unwrap();
@@ -75,7 +81,14 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let subset = signer.setup_subset();
     sender::set_subset(subset.clone());
 
-    let mut signer = Signer::new_from_params(signer_privkey, signer_pubkey.clone(), judge_pubkey.clone(), id, blinded_digest, subset);
+    let mut signer = Signer::new_from_params(
+        signer_privkey,
+        signer_pubkey.clone(),
+        judge_pubkey.clone(),
+        id,
+        blinded_digest,
+        subset,
+    );
 
     let check_parameters = sender::generate_check_parameters();
     let is_valid = signer.check(check_parameters);
@@ -87,7 +100,6 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     let encrypted_id = &signature.encrypted_id.v[0];
     let id_int: BigUint = serde_json::from_str(&encrypted_id).unwrap();
-
 
     let plain_shares = judge_privkey
         .private_key_set
@@ -110,7 +122,6 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     assert_eq!(&result, "10");
 }
-
 
 #[test]
 #[ignore]
@@ -167,12 +178,24 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let ready_params = sender::generate_ready_parameters(message.clone(), judge_pubkey.clone());
     let blinded_digest = sender::blind(message.clone());
 
-    let mut signer = Signer::new_with_blinded_digest(signer_privkey.clone(), signer_pubkey.clone(), ready_params, id);
+    let mut signer = Signer::new_with_blinded_digest(
+        signer_privkey.clone(),
+        signer_pubkey.clone(),
+        ready_params,
+        id,
+    );
 
     let subset = signer.setup_subset();
     sender::set_subset(subset.clone());
 
-    let mut signer = Signer::new_from_params(signer_privkey, signer_pubkey.clone(), judge_pubkey.clone(), id, blinded_digest, subset);
+    let mut signer = Signer::new_from_params(
+        signer_privkey,
+        signer_pubkey.clone(),
+        judge_pubkey.clone(),
+        id,
+        blinded_digest,
+        subset,
+    );
 
     let check_parameters = sender::generate_check_parameters();
     let is_valid = signer.check(check_parameters);

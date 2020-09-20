@@ -1,23 +1,27 @@
-use super::{new_ios, set_subset_ios, generate_check_parameter_ios, generate_ready_parameter_ios, unblind_ios, destroy_ios};
+use super::{
+    destroy_ios, generate_check_parameter_ios, generate_ready_parameter_ios, new_ios,
+    set_subset_ios, unblind_ios,
+};
 
 use aias_core::signer;
-use aias_core::verifyer;
 use aias_core::signer::Signer;
+use aias_core::verifyer;
 
+use aias_core::crypto::RSAPubKey;
 use aias_core::utils;
-use aias_core::crypto::{RSAPubKey};
 
-use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, BlindSignature, Subset, FBSSigner, CheckParameter };
-use std::cell::{RefCell, RefMut}; 
+use fair_blind_signature::{
+    BlindSignature, BlindedDigest, CheckParameter, EJPubKey, FBSParameters, FBSSender, FBSSigner,
+    Subset,
+};
+use std::cell::{RefCell, RefMut};
 
 use rand::rngs::OsRng;
-use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
+use rsa::{BigUint, PaddingScheme, PublicKey, PublicKeyParts, RSAPrivateKey, RSAPublicKey};
 
-use std::os::raw::{c_uint};
+use std::os::raw::c_uint;
 
 use serde_json::json;
-
-
 
 #[test]
 fn test_init_and_destroy() {
@@ -59,15 +63,12 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 0sVQIY0n9eLL7sg5aCUpGKf4Qc88wF8OPYnBzjCeiJusjkGhQ5rqdQ==
 -----END RSA PRIVATE KEY-----"#;
 
-
     let message = "hoge".to_string();
-
 
     let signer_pubkey = pk1.to_string();
     let signer_privkey = sk1.to_string();
 
     let judge_pubkey = pk1.to_string();
-
 
     let judge_pubkey = pk1.to_string();
 
@@ -76,13 +77,18 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let id = 10 as c_uint;
 
     new_ios(signer_pubkey_c, judge_pubkey_c, id);
-    
+
     let message = utils::to_c_str("aaa".to_string());
 
     let ready_params = generate_ready_parameter_ios(message, judge_pubkey_c);
     let ready_params_str = utils::from_c_str(ready_params);
 
-    let mut signer = Signer::new_with_blinded_digest(signer_privkey.clone(), signer_pubkey.clone(), ready_params_str, 10);
+    let mut signer = Signer::new_with_blinded_digest(
+        signer_privkey.clone(),
+        signer_pubkey.clone(),
+        ready_params_str,
+        10,
+    );
 
     let subset = signer.setup_subset();
     let subset = utils::to_c_str(subset.to_string());
@@ -100,7 +106,7 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     let signature = utils::from_c_str(signature);
     let message = utils::from_c_str(message);
-    
+
     let signer_pubkey = utils::from_c_str(signer_pubkey_c);
     let judge_pubkey = utils::from_c_str(judge_pubkey_c);
     let result = verifyer::verify(signature, message, signer_pubkey, judge_pubkey.clone());

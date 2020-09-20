@@ -1,19 +1,18 @@
 use crate::crypto::{DistributedRSAPrivKey, RSAPubKey};
 
-use fair_blind_signature::{ Signature, Judge, EncryptedID };
+use fair_blind_signature::{EncryptedID, Judge, Signature};
 use serde_json;
 
-use rsa::{RSAPrivateKey, RSAPublicKey, BigUint};
-use std::cell::RefCell; 
-use rand::rngs::OsRng;
+use distributed_rsa::{PlainShare, PlainShareSet};
 use fair_blind_signature::EJPrivKey;
-use distributed_rsa::{PlainShare,PlainShareSet};
+use rand::rngs::OsRng;
+use rsa::{BigUint, RSAPrivateKey, RSAPublicKey};
+use std::cell::RefCell;
 
-thread_local!(static ODB: RefCell<Option<Judge<DistributedRSAPrivKey>>> = RefCell::new(None)); 
-
+thread_local!(static ODB: RefCell<Option<Judge<DistributedRSAPrivKey>>> = RefCell::new(None));
 
 pub struct ShareSet {
-    pub share_set: PlainShareSet
+    pub share_set: PlainShareSet,
 }
 
 impl ShareSet {
@@ -33,13 +32,14 @@ impl ShareSet {
         let decrypted_str = String::from_utf8(decrypted_bytes)
             .map_err(|e| format!("failed to convert bytes into string: {}", e))?;
 
-        let v = decrypted_str.split(':').next()
+        let v = decrypted_str
+            .split(':')
+            .next()
             .ok_or(format!("failed to get ID part"))?;
-        
+
         Ok(v.to_string())
     }
 }
-
 
 pub fn divide_keys(prevkey: String, pubkey: String, count: u32) -> DistributedRSAPrivKey {
     let rng = OsRng;
