@@ -1,9 +1,7 @@
 use crate::crypto::RSAPubKey;
+use crate::DEFAULT_K;
 
-use fair_blind_signature::{
-    FBSParameters,
-    FBSVerifyer, Signature,
-};
+use fair_blind_signature::{FBSParameters, FBSVerifyer, Signature};
 
 use rsa::RSAPublicKey;
 
@@ -19,19 +17,22 @@ pub fn verify(
     let signer_pubkey =
         RSAPublicKey::from_pkcs8(&signer_pubkey.contents).expect("failed to parse pkcs8");
 
-    let judge_pubkeys = pem::parse(judge_pubkeys).expect("failed to parse pem");
-    let judge_pubkeys =
-        RSAPublicKey::from_pkcs8(&judge_pubkeys.contents).expect("failed to parse pkcs8");
+    let judge_pubkey = pem::parse(judge_pubkeys).expect("failed to parse pem");
+    let judge_pubkey =
+        RSAPublicKey::from_pkcs8(&judge_pubkey.contents).expect("failed to parse pkcs8");
 
-    let judge_pubkeys = RSAPubKey {
-        public_key: judge_pubkeys,
+    let judge_pubkey = RSAPubKey {
+        public_key: judge_pubkey,
     };
 
+    let k = DEFAULT_K;
+    let id = 114514; // this id is just placeholder
+
     let parameters = FBSParameters {
-        signer_pubkey: signer_pubkey,
-        judge_pubkey: judge_pubkeys,
-        k: 40,
-        id: 10,
+        signer_pubkey,
+        judge_pubkey,
+        k,
+        id,
     };
 
     let verifyer = FBSVerifyer::new(parameters);

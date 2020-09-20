@@ -1,8 +1,7 @@
 use crate::crypto::RSAPubKey;
+use crate::DEFAULT_K;
 
-use fair_blind_signature::{
-    BlindedDigest, CheckParameter, FBSParameters, FBSSigner,
-};
+use fair_blind_signature::{BlindedDigest, CheckParameter, FBSParameters, FBSSigner};
 
 use rsa::{RSAPrivateKey, RSAPublicKey};
 
@@ -35,11 +34,13 @@ impl Signer {
             public_key: judge_pubkey,
         };
 
+        let k = DEFAULT_K;
+
         let parameters = FBSParameters {
-            signer_pubkey: signer_pubkey,
-            judge_pubkey: judge_pubkey,
-            k: 40,
-            id: id,
+            signer_pubkey,
+            judge_pubkey,
+            k,
+            id,
         };
 
         Signer {
@@ -69,10 +70,12 @@ impl Signer {
             public_key: judge_pubkey,
         };
 
+        let k = DEFAULT_K;
+
         let parameters = FBSParameters {
             signer_pubkey: signer_pubkey,
             judge_pubkey: judge_pubkey,
-            k: 40,
+            k,
             id,
         };
 
@@ -80,6 +83,7 @@ impl Signer {
             signer: FBSSigner::new(parameters, signer_privkey),
         };
         signer.signer.set_blinded_digest(blinded_digest);
+
         signer
     }
 

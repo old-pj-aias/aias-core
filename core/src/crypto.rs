@@ -7,7 +7,6 @@ use fair_blind_signature::EJPubKey;
 
 use rsa::{BigUint, PublicKeyParts, RSAPrivateKey, RSAPublicKey};
 
-
 pub struct DistributedRSAPrivKey {
     pub private_key_set: DistributedRSAPrivateKeySet,
 }
@@ -22,7 +21,7 @@ impl RSAPubKey {
         let e = self.public_key.e();
         let n = self.public_key.n();
 
-        return plain.modpow(e, n);
+        plain.modpow(e, n)
     }
 }
 
@@ -40,9 +39,7 @@ impl DistributedRSAPrivKey {
             DistributedRSAPrivateKeySet::from_rsa_private_key(private_key, public_key, count, 1024)
                 .unwrap();
 
-        DistributedRSAPrivKey {
-            private_key_set: private_key_set,
-        }
+        DistributedRSAPrivKey { private_key_set }
     }
 
     pub fn decrypt_core(&self, cipher: BigUint) -> BigUint {
@@ -68,82 +65,77 @@ impl EJPrivKey for DistributedRSAPrivKey {
     }
 }
 
-#[test]
-fn test_encrypt_and_decrypt_rsa0() {
-    use rand::rngs::OsRng;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    let mut rng = OsRng;
-    let bits = 2048;
-    let priv_key = RSAPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
-    let pub_key = RSAPublicKey::from(&priv_key);
+    #[test]
+    fn should_encrypt_and_decrypt_rsa0() {
+        use rand::rngs::OsRng;
 
-    let m = BigUint::from_bytes_le(b"!!");
-    let n = pub_key.n();
-    let e = pub_key.e();
+        let mut rng = OsRng;
+        let bits = 2048;
+        let priv_key = RSAPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
+        let pub_key = RSAPublicKey::from(&priv_key);
 
-    let c = m.modpow(e, n);
+        let m = BigUint::from_bytes_le(b"!!");
+        let n = pub_key.n();
+        let e = pub_key.e();
 
-    let keys =
-        DistributedRSAPrivateKeySet::from_rsa_private_key(&priv_key, &pub_key, 30, 1024).unwrap();
+        let c = m.modpow(e, n);
 
-    let mut shares = Vec::new();
-    for key in keys.private_keys {
-        let share = key.generate_share(c.clone());
-        shares.push(share);
+        let keys = DistributedRSAPrivateKeySet::from_rsa_private_key(&priv_key, &pub_key, 30, 1024)
+            .unwrap();
+
+        let plain_shares = keys
+            .private_keys
+            .iter()
+            .map(|k| k.generate_share(c.clone()))
+            .collect();
+
+        let share_set = PlainShareSet { plain_shares };
+
+        let plain = share_set.decrypt();
+        println!("{}", plain);
+
+        assert_eq!(plain, m);
     }
 
-    let share_set = PlainShareSet {
-        plain_shares: shares,
-    };
+    #[test]
+    fn should_encrypt_and_decrypt_rsa1() {
+        let mut rng = rand::rngs::OsRng;
+        let bits = 2048;
 
-    let plain = share_set.decrypt();
-    println!("{}", plain);
+        let private_key = RSAPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
+        let public_key = RSAPublicKey::from(&private_key);
 
-    assert_eq!(plain, m);
-}
+        let data = BigUint::from_bytes_be(b"!!");
 
-#[test]
-fn test_encrypt_and_decrypt_rsa1() {
-    use rand::rngs::OsRng;
+        let private_key = DistributedRSAPrivKey::new(&private_key, &public_key, 10);
+        let public_key = RSAPubKey { public_key };
 
-    let mut rng = OsRng;
-    let bits = 2048;
+        let encrypted = public_key.encrypt_core(data.clone());
+        let decrypted = private_key.decrypt_core(encrypted);
 
-    let private_key = RSAPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
-    let public_key = RSAPublicKey::from(&private_key);
+        assert_eq!(data, decrypted);
+    }
 
-    let data = BigUint::from_bytes_be(b"!!");
+    #[test]
+    fn should_encrypt_and_decrypt_rsa2() {
+        let mut rng = rand::rngs::OsRng;
+        let bits = 2048;
 
-    let private_key = DistributedRSAPrivKey::new(&private_key, &public_key, 10);
-    let public_key = RSAPubKey {
-        public_key: public_key,
-    };
+        let private_key = RSAPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
+        let public_key = RSAPublicKey::from(&private_key);
 
-    let encrypted = public_key.encrypt_core(data.clone());
-    let decrypted = private_key.decrypt_core(encrypted);
+        let private_key = DistributedRSAPrivKey::new(&private_key, &public_key, 10);
+        let public_key = RSAPubKey { public_key };
 
-    assert_eq!(data, decrypted);
-}
+        let data = "aaa".to_string();
 
-#[test]
-fn test_encrypt_and_decrypt_rsa2() {
-    use rand::rngs::OsRng;
+        let encrypted = public_key.encrypt(data.clone());
+        let decrypted = private_key.decrypt(encrypted);
 
-    let mut rng = OsRng;
-    let bits = 2048;
-
-    let private_key = RSAPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
-    let public_key = RSAPublicKey::from(&private_key);
-
-    let private_key = DistributedRSAPrivKey::new(&private_key, &public_key, 10);
-    let public_key = RSAPubKey {
-        public_key: public_key,
-    };
-
-    let data = "aaa".to_string();
-
-    let encrypted = public_key.encrypt(data.clone());
-    let decrypted = private_key.decrypt(encrypted);
-
-    assert_eq!(data, decrypted);
+        assert_eq!(data, decrypted);
+    }
 }

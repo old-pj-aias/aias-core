@@ -56,7 +56,7 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let message = "hoge".to_string();
     let id = 10;
 
-    sender::new(signer_pubkey.clone(), judge_pubkey.clone(), 10);
+    sender::new(signer_pubkey.clone(), judge_pubkey.clone(), id);
 
     let mut signer = Signer::new(
         signer_privkey.clone(),
@@ -161,7 +161,7 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let message = "hoge".to_string();
     let id = 10;
 
-    sender::new(signer_pubkey.clone(), judge_pubkey.clone(), 10);
+    sender::new(signer_pubkey.clone(), judge_pubkey.clone(), id);
 
     let ready_params = sender::generate_ready_parameters(message.clone(), judge_pubkey.clone());
     let blinded_digest = sender::blind(message.clone());

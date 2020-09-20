@@ -1,9 +1,9 @@
-use crate::crypto::{DistributedRSAPrivKey};
+use crate::crypto::DistributedRSAPrivKey;
 
-use fair_blind_signature::{Judge};
+use fair_blind_signature::Judge;
 use serde_json;
 
-use distributed_rsa::{PlainShareSet};
+use distributed_rsa::PlainShareSet;
 use rsa::{RSAPrivateKey, RSAPublicKey};
 use std::cell::RefCell;
 
@@ -30,12 +30,11 @@ impl ShareSet {
         let decrypted_str = String::from_utf8(decrypted_bytes)
             .map_err(|e| format!("failed to convert bytes into string: {}", e))?;
 
-        let v = decrypted_str
+        decrypted_str
             .split(':')
             .next()
-            .ok_or(format!("failed to get ID part"))?;
-
-        Ok(v.to_string())
+            .ok_or("failed to get ID part".to_string())
+            .map(|v| v.to_string())
     }
 }
 
@@ -46,9 +45,7 @@ pub fn divide_keys(prevkey: String, pubkey: String, count: u32) -> DistributedRS
     let pubkey = pem::parse(pubkey).expect("failed to parse pem");
     let pubkey = RSAPublicKey::from_pkcs8(&pubkey.contents).expect("failed to parse pkcs8");
 
-    let privkey = DistributedRSAPrivKey::new(&privkey, &pubkey, count);
-
-    return privkey;
+    DistributedRSAPrivKey::new(&privkey, &pubkey, count)
 }
 
 pub fn open(plain_shares: Vec<String>) -> Result<String, String> {
