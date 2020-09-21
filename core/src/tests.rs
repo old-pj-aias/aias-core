@@ -1,20 +1,11 @@
-use crate::crypto::{RSAPubKey, DistributedRSAPrivKey};
 use crate::judge;
-use crate::signer::{Signer};
 use crate::sender;
+use crate::signer::Signer;
 use crate::verifyer;
 
-use crate::utils;
-use crate::crypto;
+use fair_blind_signature::Signature;
 
-use fair_blind_signature::{EJPubKey, FBSParameters, FBSSender, BlindedDigest, BlindSignature, Subset, FBSSigner, CheckParameter, Signature };
-use std::cell::{RefCell, RefMut}; 
-use distributed_rsa::PlainShareSet;
-
-use rand::rngs::OsRng;
-use rsa::{BigUint, PublicKey, RSAPrivateKey, RSAPublicKey, PaddingScheme, PublicKeyParts};
-
-
+use rsa::BigUint;
 
 #[test]
 fn test_all() {
@@ -65,9 +56,14 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let message = "hoge".to_string();
     let id = 10;
 
-    sender::new(signer_pubkey.clone(), judge_pubkey.clone(), 10);
+    sender::new(signer_pubkey.clone(), judge_pubkey.clone(), id);
 
-    let mut signer = Signer::new(signer_privkey.clone(), signer_pubkey.clone(), judge_pubkey.clone(), id);
+    let mut signer = Signer::new(
+        signer_privkey.clone(),
+        signer_pubkey.clone(),
+        judge_pubkey.clone(),
+        id,
+    );
 
     let blinded_digest = sender::blind(message.clone());
     signer.set_blinded_digest(blinded_digest.clone()).unwrap();
@@ -75,11 +71,18 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let subset = signer.setup_subset();
     sender::set_subset(subset.clone());
 
-    let mut signer = Signer::new_from_params(signer_privkey, signer_pubkey.clone(), judge_pubkey.clone(), id, blinded_digest, subset);
+    let mut signer = Signer::new_from_params(
+        signer_privkey,
+        signer_pubkey.clone(),
+        judge_pubkey.clone(),
+        id,
+        blinded_digest,
+        subset,
+    );
 
     let check_parameters = sender::generate_check_parameters();
     let is_valid = signer.check(check_parameters);
-    assert!(is_valid);
+    assert_eq!(is_valid, Ok(()));
 
     let blind_signature = signer.sign();
     let signature_str = sender::unblind(blind_signature);
@@ -87,7 +90,6 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     let encrypted_id = &signature.encrypted_id.v[0];
     let id_int: BigUint = serde_json::from_str(&encrypted_id).unwrap();
-
 
     let plain_shares = judge_privkey
         .private_key_set
@@ -100,17 +102,14 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
         .collect();
 
     let result = verifyer::verify(signature_str.clone(), message, signer_pubkey, judge_pubkey);
-    assert!(result);
+    assert_eq!(result, Ok(()));
 
     sender::destroy();
-
-    let id_bytes = id_int.to_bytes_le();
 
     let result = judge::open(plain_shares).unwrap();
 
     assert_eq!(&result, "10");
 }
-
 
 #[test]
 #[ignore]
@@ -162,27 +161,39 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let message = "hoge".to_string();
     let id = 10;
 
-    sender::new(signer_pubkey.clone(), judge_pubkey.clone(), 10);
+    sender::new(signer_pubkey.clone(), judge_pubkey.clone(), id);
 
     let ready_params = sender::generate_ready_parameters(message.clone(), judge_pubkey.clone());
     let blinded_digest = sender::blind(message.clone());
 
-    let mut signer = Signer::new_with_blinded_digest(signer_privkey.clone(), signer_pubkey.clone(), ready_params, id);
+    let mut signer = Signer::new_with_blinded_digest(
+        signer_privkey.clone(),
+        signer_pubkey.clone(),
+        ready_params,
+        id,
+    );
 
     let subset = signer.setup_subset();
     sender::set_subset(subset.clone());
 
-    let mut signer = Signer::new_from_params(signer_privkey, signer_pubkey.clone(), judge_pubkey.clone(), id, blinded_digest, subset);
+    let mut signer = Signer::new_from_params(
+        signer_privkey,
+        signer_pubkey.clone(),
+        judge_pubkey.clone(),
+        id,
+        blinded_digest,
+        subset,
+    );
 
     let check_parameters = sender::generate_check_parameters();
     let is_valid = signer.check(check_parameters);
-    assert!(is_valid);
+    assert_eq!(is_valid, Ok(()));
 
     let blind_signature = signer.sign();
     let signature = sender::unblind(blind_signature);
 
     let result = verifyer::verify(signature.clone(), message, signer_pubkey, judge_pubkey);
-    assert!(result);
+    assert_eq!(result, Ok(()));
 
     sender::destroy();
 

@@ -1,10 +1,11 @@
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-
-pub mod utils;
 pub mod crypto;
+pub mod judge;
 pub mod sender;
 pub mod signer;
+pub mod utils;
 pub mod verifyer;
-pub mod judge;
+
+#[cfg(test)]
 mod tests;
+
+pub const DEFAULT_K: u32 = 40;

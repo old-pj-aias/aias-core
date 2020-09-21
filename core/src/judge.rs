@@ -1,19 +1,16 @@
-use crate::crypto::{DistributedRSAPrivKey, RSAPubKey};
+use crate::crypto::DistributedRSAPrivKey;
 
-use fair_blind_signature::{ Signature, Judge, EncryptedID };
+use fair_blind_signature::Judge;
 use serde_json;
 
-use rsa::{RSAPrivateKey, RSAPublicKey, BigUint};
-use std::cell::RefCell; 
-use rand::rngs::OsRng;
-use fair_blind_signature::EJPrivKey;
-use distributed_rsa::{PlainShare,PlainShareSet};
+use distributed_rsa::PlainShareSet;
+use rsa::{RSAPrivateKey, RSAPublicKey};
+use std::cell::RefCell;
 
-thread_local!(static ODB: RefCell<Option<Judge<DistributedRSAPrivKey>>> = RefCell::new(None)); 
-
+thread_local!(static ODB: RefCell<Option<Judge<DistributedRSAPrivKey>>> = RefCell::new(None));
 
 pub struct ShareSet {
-    pub share_set: PlainShareSet
+    pub share_set: PlainShareSet,
 }
 
 impl ShareSet {
@@ -33,27 +30,22 @@ impl ShareSet {
         let decrypted_str = String::from_utf8(decrypted_bytes)
             .map_err(|e| format!("failed to convert bytes into string: {}", e))?;
 
-        let v = decrypted_str.split(':').next()
-            .ok_or(format!("failed to get ID part"))?;
-        
-        Ok(v.to_string())
+        decrypted_str
+            .split(':')
+            .next()
+            .ok_or("failed to get ID part".to_string())
+            .map(|v| v.to_string())
     }
 }
 
-
 pub fn divide_keys(prevkey: String, pubkey: String, count: u32) -> DistributedRSAPrivKey {
-    let rng = OsRng;
-    let bits = 2048;
-
     let privkey = pem::parse(prevkey).expect("failed to parse pem");
     let privkey = RSAPrivateKey::from_pkcs1(&privkey.contents).expect("failed to parse pkcs1");
 
     let pubkey = pem::parse(pubkey).expect("failed to parse pem");
     let pubkey = RSAPublicKey::from_pkcs8(&pubkey.contents).expect("failed to parse pkcs8");
 
-    let privkey = DistributedRSAPrivKey::new(&privkey, &pubkey, count);
-
-    return privkey;
+    DistributedRSAPrivKey::new(&privkey, &pubkey, count)
 }
 
 pub fn open(plain_shares: Vec<String>) -> Result<String, String> {
