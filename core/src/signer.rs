@@ -1,7 +1,7 @@
 use crate::crypto::RSAPubKey;
 use crate::DEFAULT_K;
 
-use fair_blind_signature::{BlindedDigest, CheckParameter, FBSParameters, FBSSigner};
+use fair_blind_signature::{BlindedDigest, CheckError, CheckParameter, FBSParameters, FBSSigner};
 
 use rsa::{RSAPrivateKey, RSAPublicKey};
 
@@ -116,7 +116,7 @@ impl Signer {
         serde_json::to_string(&subset).unwrap()
     }
 
-    pub fn check(&mut self, check_parameter: String) -> bool {
+    pub fn check(&mut self, check_parameter: String) -> Result<(), CheckError> {
         let check_parameter: CheckParameter =
             serde_json::from_str(&check_parameter).expect("failed to parse json");
         self.signer.check(check_parameter)

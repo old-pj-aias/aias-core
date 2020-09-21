@@ -82,7 +82,7 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     let check_parameters = sender::generate_check_parameters();
     let is_valid = signer.check(check_parameters);
-    assert!(is_valid);
+    assert_eq!(is_valid, Ok(()));
 
     let blind_signature = signer.sign();
     let signature_str = sender::unblind(blind_signature);
@@ -102,7 +102,7 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
         .collect();
 
     let result = verifyer::verify(signature_str.clone(), message, signer_pubkey, judge_pubkey);
-    assert!(result);
+    assert_eq!(result, Ok(()));
 
     sender::destroy();
 
@@ -187,13 +187,13 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
 
     let check_parameters = sender::generate_check_parameters();
     let is_valid = signer.check(check_parameters);
-    assert!(is_valid);
+    assert_eq!(is_valid, Ok(()));
 
     let blind_signature = signer.sign();
     let signature = sender::unblind(blind_signature);
 
     let result = verifyer::verify(signature.clone(), message, signer_pubkey, judge_pubkey);
-    assert!(result);
+    assert_eq!(result, Ok(()));
 
     sender::destroy();
 

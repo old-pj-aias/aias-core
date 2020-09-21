@@ -26,7 +26,7 @@ impl RSAPubKey {
 }
 
 impl EJPubKey for RSAPubKey {
-    fn encrypt(&self, plain: String) -> String {
+    fn encrypt(&self, plain: &str) -> String {
         let plain = BigUint::from_bytes_le(plain.as_bytes());
         let cipher = self.encrypt_core(plain);
         serde_json::to_string(&cipher).unwrap()
@@ -58,7 +58,7 @@ impl DistributedRSAPrivKey {
 }
 
 impl EJPrivKey for DistributedRSAPrivKey {
-    fn decrypt(&self, cipher: String) -> String {
+    fn decrypt(&self, cipher: &str) -> String {
         let c: BigUint = serde_json::from_str(&cipher).unwrap();
         let plain = self.decrypt_core(c);
         String::from_utf8(plain.to_bytes_le()).unwrap()
@@ -131,10 +131,10 @@ mod tests {
         let private_key = DistributedRSAPrivKey::new(&private_key, &public_key, 10);
         let public_key = RSAPubKey { public_key };
 
-        let data = "aaa".to_string();
+        let data = "aaa";
 
-        let encrypted = public_key.encrypt(data.clone());
-        let decrypted = private_key.decrypt(encrypted);
+        let encrypted = public_key.encrypt(data);
+        let decrypted = private_key.decrypt(&encrypted);
 
         assert_eq!(data, decrypted);
     }

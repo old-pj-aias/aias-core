@@ -1,7 +1,7 @@
 use crate::crypto::RSAPubKey;
 use crate::DEFAULT_K;
 
-use fair_blind_signature::{FBSParameters, FBSVerifyer, Signature};
+use fair_blind_signature::{FBSParameters, FBSVerifyer, Signature, VerifyError};
 
 use rsa::RSAPublicKey;
 
@@ -10,7 +10,7 @@ pub fn verify(
     message: String,
     signer_pubkey: String,
     judge_pubkeys: String,
-) -> bool {
+) -> Result<(), VerifyError> {
     let signature: Signature = serde_json::from_str(&signature).expect("Parsing json error");
 
     let signer_pubkey = pem::parse(signer_pubkey).expect("failed to parse pem");
