@@ -14,14 +14,13 @@ pub extern "C" fn verify(
     let signer_pubkey_str = utils::from_c_str(signer_pubkey);
     let judge_pubkey_str = utils::from_c_str(judge_pubkeys);
 
-    if verifyer::verify(
+    match verifyer::verify(
         signature_str,
         message_str,
         signer_pubkey_str,
         judge_pubkey_str,
     ) {
-        1
-    } else {
-        0
+        Ok(()) => 1,
+        _ => 0,
     }
 }

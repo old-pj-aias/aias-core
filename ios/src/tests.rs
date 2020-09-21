@@ -82,7 +82,7 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let check_parameters = generate_check_parameter_ios();
     let check_parameters = utils::from_c_str(check_parameters);
 
-    signer.check(check_parameters);
+    signer.check(check_parameters).unwrap();
 
     let blind_signature = signer.sign();
     let blind_signature = utils::to_c_str(blind_signature);
@@ -95,7 +95,7 @@ O+zc6JPZDWBppJDWot9d5HeNEjDBMcSqcpeXXYU8XvxA+uECLPctLgNMWxyKFx95
     let judge_pubkey = utils::from_c_str(judge_pubkey_c);
     let result = verifyer::verify(signature, message, signer_pubkey, judge_pubkey.clone());
 
-    assert!(result);
+    assert_eq!(result, Ok(()));
 
     destroy_ios();
 }

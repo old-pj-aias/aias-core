@@ -1,8 +1,8 @@
-use aias_core::sender;
-
 use jni::objects::{JClass, JString};
 use jni::sys::jstring;
 use jni::JNIEnv;
+
+use aias_core::sender;
 
 #[no_mangle]
 pub extern "system" fn Java_com_aias_aias_Aias_new(
