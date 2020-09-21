@@ -1,0 +1,3 @@
+[submodule "core/secrets"]
+	path = core/secrets
+	url = git@github.com:project-aias/test-secrets.git
